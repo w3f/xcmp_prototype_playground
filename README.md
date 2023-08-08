@@ -47,7 +47,6 @@ pub struct RelayerProof {
     message_proof: MmrProof,
     relay_proof: RelayProof, 
 }
-```
 
 pub struct MmrProof {
     mmr_peaks: Vec<MmrNode>,
@@ -58,6 +57,7 @@ pub struct RelayProof {
     relay_root: Hash,
     relay_nodes: Vec<RelayNode>,
 }
+```
 
 #### Incentivization of Relayer:
 
