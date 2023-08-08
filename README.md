@@ -3,6 +3,14 @@
 ### Overview
 In a scenario where `ParaA` wants to send a message to `ParaB` (`ParaA -> ParaB`), various steps and data structures come into play. 
 
+
+### Prototypes for two approaches which are the following:
+    1. Msgs are unordered and no guranteed delivery(Use MMR approach here)
+    2. Msgs are ordered (Use msg hash chain)
+
+
+## Approach 1
+
 ### Data Structure Format and Flow
 
 ParaA MSGab -> Message MMR -> MMR root -> XCMP trie -> XCMP trie root -> Parachain State trie -> Parachain state root -> Relay state trie -> Relay Root
