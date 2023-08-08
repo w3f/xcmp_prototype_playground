@@ -3,11 +3,14 @@
 ### Overview
 In a scenario where `ParaA` wants to send a message to `ParaB` (`ParaA -> ParaB`), various steps and data structures come into play. 
 
+## Goals with this Repo
+
+- Better understand an efficient implementations of different XCMP approaches(proof sizes, overall onchain benchmarking, code complexity)
+- Achieve consensus on an XCMP design and approach to put forward to the community (By showing pros and cons of a few different approaches)
 
 ### Prototypes for two approaches which are the following:
     1. Msgs are unordered and no guranteed delivery(Use MMR approach here)
     2. Msgs are ordered (Use msg hash chain)
-
 
 ## Approach 1
 
