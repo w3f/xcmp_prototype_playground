@@ -52,6 +52,8 @@ Q:
    - Submits proof to `ParaB`'s XCMP extrinsic labeled `verify_xcmp_message(RelayerProof)`.
 
 ```rust
+
+// Note: Not actual type just for explanation purposes
 pub struct RelayerProof {
     message: XcmMessage,
     mmr_root: Hash,
@@ -59,15 +61,18 @@ pub struct RelayerProof {
     relay_proof: RelayProof, 
 }
 
+// Note: Not actual type just for explanation purposes
 pub struct MmrProof {
     mmr_peaks: Vec<MmrNode>,
     mmr_nodes: Vec<MmrNode>,
 }
 
+// Note: Not actual type just for explanation purposes
 pub struct RelayProof {
     relay_root: Hash,
     relay_nodes: Vec<RelayNode>,
 }
+
 ```
 
 #### Incentivization of Relayer:
