@@ -15,10 +15,12 @@ use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, Verify},
+	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, Verify, Keccak256},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature,
 };
+
+use sp_consensus_beefy::mmr::MmrLeafVersion;
 
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -58,7 +60,7 @@ use xcm::latest::prelude::BodyId;
 use xcm_executor::XcmExecutor;
 
 /// Import the template pallet.
-pub use pallet_parachain_template;
+pub use pallet_xcmp_message_stuffer;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
@@ -458,9 +460,34 @@ impl pallet_collator_selection::Config for Runtime {
 	type WeightInfo = ();
 }
 
-/// Configure the pallet template in pallets/template.
-impl pallet_parachain_template::Config for Runtime {
+parameter_types! {
+	/// Version of the produced MMR leaf.
+	///
+	/// The version consists of two parts;
+	/// - `major` (3 bits)
+	/// - `minor` (5 bits)
+	///
+	/// `major` should be updated only if decoding the previous MMR Leaf format from the payload
+	/// is not possible (i.e. backward incompatible change).
+	/// `minor` should be updated if fields are added to the previous MMR Leaf, which given SCALE
+	/// encoding does not prevent old leafs from being decoded.
+	///
+	/// Hence we expect `major` to be changed really rarely (think never).
+	/// See [`MmrLeafVersion`] type documentation for more details.
+	pub LeafVersion: MmrLeafVersion = MmrLeafVersion::new(0, 0);
+}
+
+impl pallet_xcmp_message_stuffer::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+	type LeafVersion = LeafVersion;
+}
+
+impl pallet_mmr::Config for Runtime {
+	const INDEXING_PREFIX: &'static [u8] = pallet_mmr::primitives::INDEXING_PREFIX;
+	type OnNewRoot = pallet_xcmp_message_stuffer::OnNewRootSatisfier<Runtime>;
+	type Hashing = Keccak256;
+	type LeafData = pallet_xcmp_message_stuffer::Pallet<Runtime>;
+	type WeightInfo = ();
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -493,8 +520,7 @@ construct_runtime!(
 		CumulusXcm: cumulus_pallet_xcm = 32,
 		DmpQueue: cumulus_pallet_dmp_queue = 33,
 
-		// Template
-		TemplatePallet: pallet_parachain_template = 50,
+		MsgStuffer: pallet_xcmp_message_stuffer = 50,
 	}
 );
 
