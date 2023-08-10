@@ -20,6 +20,8 @@ use sp_runtime::{
 	ApplyExtrinsicResult, MultiSignature,
 };
 
+use sp_consensus_beefy::mmr::MmrLeafVersion;
+
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -458,9 +460,26 @@ impl pallet_collator_selection::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	/// Version of the produced MMR leaf.
+	///
+	/// The version consists of two parts;
+	/// - `major` (3 bits)
+	/// - `minor` (5 bits)
+	///
+	/// `major` should be updated only if decoding the previous MMR Leaf format from the payload
+	/// is not possible (i.e. backward incompatible change).
+	/// `minor` should be updated if fields are added to the previous MMR Leaf, which given SCALE
+	/// encoding does not prevent old leafs from being decoded.
+	///
+	/// Hence we expect `major` to be changed really rarely (think never).
+	/// See [`MmrLeafVersion`] type documentation for more details.
+	pub LeafVersion: MmrLeafVersion = MmrLeafVersion::new(0, 0);
+}
+
 impl pallet_xcmp_message_stuffer::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type MmrLeafVersion = ();
+	type LeafVersion = LeafVersion;
 }
 
 impl pallet_mmr::Config for Runtime {

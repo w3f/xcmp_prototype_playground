@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
-use pallet_mmr::LeafDataProvider;
+use pallet_mmr::{LeafDataProvider, ParentNumberAndHash};
 use sp_consensus_beefy::mmr::MmrLeafVersion;
 
 use frame_support::{dispatch::{DispatchResult, Vec}, pallet_prelude::*,};
@@ -25,7 +25,7 @@ pub mod pallet {
 	#[pallet::config]
 	pub trait Config: frame_system::Config + pallet_mmr::Config {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-		type MmrLeafVersion;
+		type LeafVersion: Get<MmrLeafVersion>;
 	}
 
 	#[pallet::pallet]
@@ -71,21 +71,22 @@ impl<T> pallet_mmr::primitives::OnNewRoot<sp_consensus_beefy::MmrRootHash> for O
 	}
 }
 
-impl<T> LeafDataProvider for Pallet<T> {
-	type LeafData = u32;
-
-	fn leaf_data() -> Self::LeafData {
-		0
-	}
-}
-
+#[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
 pub struct MmrLeaf<BlockNumber, Hash> {
 	version: MmrLeafVersion,
-	xcmp_msg: Vec<u8>,
-	hash_and_number: (Hash, BlockNumber),
+	xcmp_msg: Vec<u8>, // TODO: Replace with some XCMP message type I assume..
+	parent_number_and_hash: (BlockNumber, Hash),
 }
 
-// impl<T: Config> LeafDataProvider for Pallet<T> {
-// 	type LeafData = MmrLeaf<T::BlockNumber, T::Hash>;
-// }
+impl<T: Config> LeafDataProvider for Pallet<T> {
+	type LeafData = MmrLeaf<BlockNumberFor<T>, T::Hash>;
+
+	fn leaf_data() -> Self::LeafData {
+		Self::LeafData {
+			version: T::LeafVersion::get(),
+			xcmp_msg: Vec::new(),
+			parent_number_and_hash: ParentNumberAndHash::<T>::leaf_data(),
+		}
+	}
+}
 

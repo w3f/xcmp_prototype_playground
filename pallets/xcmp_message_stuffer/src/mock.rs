@@ -5,6 +5,7 @@ use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup, Keccak256},
 	BuildStorage,
 };
+use sp_consensus_beefy::mmr::MmrLeafVersion;
 
 type Block = frame_system::mocking::MockBlock<Test>;
 
@@ -48,9 +49,26 @@ impl system::Config for Test {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
+parameter_types! {
+	/// Version of the produced MMR leaf.
+	///
+	/// The version consists of two parts;
+	/// - `major` (3 bits)
+	/// - `minor` (5 bits)
+	///
+	/// `major` should be updated only if decoding the previous MMR Leaf format from the payload
+	/// is not possible (i.e. backward incompatible change).
+	/// `minor` should be updated if fields are added to the previous MMR Leaf, which given SCALE
+	/// encoding does not prevent old leafs from being decoded.
+	///
+	/// Hence we expect `major` to be changed really rarely (think never).
+	/// See [`MmrLeafVersion`] type documentation for more details.
+	pub LeafVersion: MmrLeafVersion = MmrLeafVersion::new(0, 0);
+}
+
 impl crate::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
-	type MmrLeafVersion = ();
+	type LeafVersion = LeafVersion;
 }
 
 impl pallet_mmr::Config for Test {
