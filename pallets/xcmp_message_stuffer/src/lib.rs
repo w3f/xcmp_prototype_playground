@@ -16,6 +16,14 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+pub trait XcmpMessageProvider<Hash> {
+	type XcmpMessage: Encode + Decode + frame_support::dispatch::fmt::Debug + PartialEq + Clone;
+
+	fn get_xcmp_message(block_hash: Hash) -> Self::XcmpMessage;
+}
+
+type XcmpMessage<T> = <<T as crate::Config>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessage;
+
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -26,6 +34,7 @@ pub mod pallet {
 	pub trait Config: frame_system::Config + pallet_mmr::Config {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		type LeafVersion: Get<MmrLeafVersion>;
+		type XcmpDataProvider: XcmpMessageProvider<Self::Hash>; // TODO: Needs to be XCMP message commitment or the actual message?
 	}
 
 	#[pallet::pallet]
@@ -47,13 +56,9 @@ pub mod pallet {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 	}
 
-	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
-	// These functions materialize as "extrinsics", which are often compared to transactions.
-	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// An example dispatchable that takes a singles value as a parameter, writes the value to
-		/// storage and emits an event. This function must be dispatched by a signed extrinsic.
+
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn verify_proof(origin: OriginFor<T>) -> DispatchResult {
@@ -72,19 +77,19 @@ impl<T> pallet_mmr::primitives::OnNewRoot<sp_consensus_beefy::MmrRootHash> for O
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
-pub struct MmrLeaf<BlockNumber, Hash> {
+pub struct MmrLeaf<BlockNumber, Hash, XcmpMessage> {
 	version: MmrLeafVersion,
-	xcmp_msg: Vec<u8>, // TODO: Replace with some XCMP message type I assume..
+	xcmp_msg: XcmpMessage,
 	parent_number_and_hash: (BlockNumber, Hash),
 }
 
 impl<T: Config> LeafDataProvider for Pallet<T> {
-	type LeafData = MmrLeaf<BlockNumberFor<T>, T::Hash>;
+	type LeafData = MmrLeaf<BlockNumberFor<T>, T::Hash, XcmpMessage<T>>;
 
 	fn leaf_data() -> Self::LeafData {
 		Self::LeafData {
 			version: T::LeafVersion::get(),
-			xcmp_msg: Vec::new(),
+			xcmp_msg: T::XcmpDataProvider::get_xcmp_message(ParentNumberAndHash::<T>::leaf_data().1), // TODO: This needs to be the current XCMP messages in the current block?
 			parent_number_and_hash: ParentNumberAndHash::<T>::leaf_data(),
 		}
 	}
