@@ -9,6 +9,8 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 mod weights;
 pub mod xcm_config;
 
+use sp_core::Hasher;
+
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
@@ -43,6 +45,7 @@ use frame_system::{
 	EnsureRoot,
 };
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
+use pallet_xcmp_message_stuffer::XcmpMessageProvider;
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
 use xcm_config::{RelayLocation, XcmConfig, XcmOriginToTransactDispatchOrigin};
@@ -460,6 +463,16 @@ impl pallet_collator_selection::Config for Runtime {
 	type WeightInfo = ();
 }
 
+pub struct XcmpDataProvider;
+impl XcmpMessageProvider<Hash> for XcmpDataProvider {
+	type XcmpMessage = Hash;
+
+	fn get_xcmp_message(block_hash: Hash) -> Self::XcmpMessage {
+		// TODO: Temporarily to "Mock" the Xcmp message we just place the hash of the block hash
+		<BlakeTwo256 as Hasher>::hash(block_hash.as_bytes())
+	}
+}
+
 parameter_types! {
 	/// Version of the produced MMR leaf.
 	///
@@ -480,6 +493,7 @@ parameter_types! {
 impl pallet_xcmp_message_stuffer::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type LeafVersion = LeafVersion;
+	type XcmpDataProvider = XcmpDataProvider;
 }
 
 impl pallet_mmr::Config for Runtime {
