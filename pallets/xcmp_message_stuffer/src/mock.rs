@@ -82,9 +82,9 @@ pub type MmrLeaf = crate::MmrLeaf<
 
 pub struct XcmpDataProvider;
 impl XcmpMessageProvider<Hash> for XcmpDataProvider {
-	type XcmpMessage = Hash;
+	type XcmpMessages = Hash;
 
-	fn get_xcmp_message(block_hash: Hash) -> Self::XcmpMessage {
+	fn get_xcmp_message(block_hash: Hash) -> Self::XcmpMessages {
 		// TODO: Temporarily to "Mock" the Xcmp message we just place the hash of the block hash
 		<BlakeTwo256 as Hasher>::hash(block_hash.as_bytes())
 	}

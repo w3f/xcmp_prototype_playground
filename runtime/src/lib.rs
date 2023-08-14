@@ -38,7 +38,7 @@ use frame_support::{
 		constants::WEIGHT_REF_TIME_PER_SECOND, ConstantMultiplier, Weight, WeightToFeeCoefficient,
 		WeightToFeeCoefficients, WeightToFeePolynomial,
 	},
-	PalletId,
+	PalletId, IterableStorageDoubleMap,
 };
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
@@ -465,11 +465,17 @@ impl pallet_collator_selection::Config for Runtime {
 
 pub struct XcmpDataProvider;
 impl XcmpMessageProvider<Hash> for XcmpDataProvider {
-	type XcmpMessage = Hash;
+	type XcmpMessages = Hash;
 
-	fn get_xcmp_message(block_hash: Hash) -> Self::XcmpMessage {
-		// TODO: Temporarily to "Mock" the Xcmp message we just place the hash of the block hash
-		<BlakeTwo256 as Hasher>::hash(block_hash.as_bytes())
+	fn get_xcmp_message(block_hash: Hash) -> Self::XcmpMessages {
+		// TODO: Temporarily to "Mock" the Xcmp messages we just hash the whole outbound queue
+		// <BlakeTwo256 as Hasher>::hash(block_hash.as_bytes())
+		let msgs: Vec<Vec<u8>> =
+		<XcmpQueue::Storage::OutboundXcmpMessages as IterableStorageDoubleMap<cumulus_primitives_core::ParaId, u16, Vec<u8>>>::iter().filter_map(|(_, outbound_xcmp)| {
+				outbound_xcmp
+			})
+			.collect();
+		<BlakeTwo256 as Hasher>::hash(msgs.as_slice())
 	}
 }
 

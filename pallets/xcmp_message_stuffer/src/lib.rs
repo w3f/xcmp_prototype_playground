@@ -17,12 +17,12 @@ mod tests;
 mod benchmarking;
 
 pub trait XcmpMessageProvider<Hash> {
-	type XcmpMessage: Encode + Decode + frame_support::dispatch::fmt::Debug + PartialEq + Clone;
+	type XcmpMessages: Encode + Decode + frame_support::dispatch::fmt::Debug + PartialEq + Clone;
 
-	fn get_xcmp_message(block_hash: Hash) -> Self::XcmpMessage;
+	fn get_xcmp_message(block_hash: Hash) -> Self::XcmpMessages;
 }
 
-type XcmpMessage<T> = <<T as crate::Config>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessage;
+type XcmpMessages<T> = <<T as crate::Config>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
 
 
 #[frame_support::pallet]
@@ -77,14 +77,14 @@ impl<T> pallet_mmr::primitives::OnNewRoot<sp_consensus_beefy::MmrRootHash> for O
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
-pub struct MmrLeaf<BlockNumber, Hash, XcmpMessage> {
+pub struct MmrLeaf<BlockNumber, Hash, XcmpMessages> {
 	version: MmrLeafVersion,
-	xcmp_msg: XcmpMessage,
+	xcmp_msg: XcmpMessages,
 	parent_number_and_hash: (BlockNumber, Hash),
 }
 
 impl<T: Config> LeafDataProvider for Pallet<T> {
-	type LeafData = MmrLeaf<BlockNumberFor<T>, T::Hash, XcmpMessage<T>>;
+	type LeafData = MmrLeaf<BlockNumberFor<T>, T::Hash, XcmpMessages<T>>;
 
 	fn leaf_data() -> Self::LeafData {
 		Self::LeafData {
