@@ -6,6 +6,7 @@ use sp_consensus_beefy::mmr::MmrLeafVersion;
 
 use frame_support::{dispatch::{DispatchResult, Vec}, pallet_prelude::*,};
 use frame_system::pallet_prelude::*;
+use cumulus_primitives_core::ParaId;
 
 #[cfg(test)]
 mod mock;
@@ -17,12 +18,12 @@ mod tests;
 mod benchmarking;
 
 pub trait XcmpMessageProvider<Hash> {
-	type XcmpMessage: Encode + Decode + frame_support::dispatch::fmt::Debug + PartialEq + Clone;
+	type XcmpMessages: Encode + Decode + frame_support::dispatch::fmt::Debug + PartialEq + Clone;
 
-	fn get_xcmp_message(block_hash: Hash) -> Self::XcmpMessage;
+	fn get_xcmp_messages(block_hash: Hash, para_id: ParaId) -> Self::XcmpMessages;
 }
 
-type XcmpMessage<T> = <<T as crate::Config>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessage;
+type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
 
 
 #[frame_support::pallet]
@@ -31,39 +32,26 @@ pub mod pallet {
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
-	pub trait Config: frame_system::Config + pallet_mmr::Config {
-		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_mmr::Config<I> {
+		type ParaIdentifier: Get<ParaId>;
+		type RuntimeEvent: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		type LeafVersion: Get<MmrLeafVersion>;
 		type XcmpDataProvider: XcmpMessageProvider<Self::Hash>; // TODO: Needs to be XCMP message commitment or the actual message?
 	}
 
 	#[pallet::pallet]
-	pub struct Pallet<T>(_);
+	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config> {
+	pub enum Event<T: Config<I>, I: 'static = ()> {
 		SomeEvent,
 	}
 
 	// Errors inform users that something went wrong.
 	#[pallet::error]
-	pub enum Error<T> {
+	pub enum Error<T, I = ()> {
 		SomeError,
-	}
-
-	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-	}
-
-	#[pallet::call]
-	impl<T: Config> Pallet<T> {
-
-		#[pallet::call_index(0)]
-		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn verify_proof(origin: OriginFor<T>) -> DispatchResult {
-			Ok(())
-		}
 	}
 
 }
@@ -77,19 +65,19 @@ impl<T> pallet_mmr::primitives::OnNewRoot<sp_consensus_beefy::MmrRootHash> for O
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
-pub struct MmrLeaf<BlockNumber, Hash, XcmpMessage> {
+pub struct MmrLeaf<BlockNumber, Hash, XcmpMessages> {
 	version: MmrLeafVersion,
-	xcmp_msg: XcmpMessage,
+	xcmp_msgs: XcmpMessages,
 	parent_number_and_hash: (BlockNumber, Hash),
 }
 
-impl<T: Config> LeafDataProvider for Pallet<T> {
-	type LeafData = MmrLeaf<BlockNumberFor<T>, T::Hash, XcmpMessage<T>>;
+impl<T: Config<I>, I: 'static> LeafDataProvider for Pallet<T, I> {
+	type LeafData = MmrLeaf<BlockNumberFor<T>, T::Hash, XcmpMessages<T, I>>;
 
 	fn leaf_data() -> Self::LeafData {
 		Self::LeafData {
 			version: T::LeafVersion::get(),
-			xcmp_msg: T::XcmpDataProvider::get_xcmp_message(ParentNumberAndHash::<T>::leaf_data().1), // TODO: This needs to be the current XCMP messages in the current block?
+			xcmp_msgs: T::XcmpDataProvider::get_xcmp_messages(ParentNumberAndHash::<T>::leaf_data().1, T::ParaIdentifier::get()), // TODO: This needs to be the current XCMP messages in the current block?
 			parent_number_and_hash: ParentNumberAndHash::<T>::leaf_data(),
 		}
 	}

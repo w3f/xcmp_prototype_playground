@@ -22,6 +22,7 @@ frame-system = { git = "https://github.com/paritytech/substrate", default-featur
 pallet-mmr = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
 sp-consensus-beefy = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
 sp-core = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
+cumulus-primitives-core = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
 
 [dev-dependencies]
 serde = { version = "1.0.163" }
@@ -35,6 +36,7 @@ default = ["std"]
 runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]
 std = [
 	"codec/std",
+	"cumulus-primitives-core/std",
 	"scale-info/std",
 	"sp-consensus-beefy/std",
 	"sp-core/std",

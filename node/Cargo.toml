@@ -59,13 +59,13 @@ polkadot-primitives = { git = "https://github.com/paritytech/polkadot", branch =
 xcm = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v1.0.0" }
 
 # Cumulus
-cumulus-client-cli = { git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v1.0.0" }
-cumulus-client-consensus-aura = { git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v1.0.0" }
-cumulus-client-consensus-common = { git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v1.0.0" }
-cumulus-client-service = { git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v1.0.0" }
-cumulus-primitives-core = { git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v1.0.0" }
-cumulus-primitives-parachain-inherent = { git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v1.0.0" }
-cumulus-relay-chain-interface = { git = "https://github.com/paritytech/cumulus.git", branch = "polkadot-v1.0.0" }
+cumulus-client-cli = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
+cumulus-client-consensus-aura = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
+cumulus-client-consensus-common = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
+cumulus-client-service = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
+cumulus-primitives-core = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
+cumulus-primitives-parachain-inherent = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
+cumulus-relay-chain-interface = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
 color-print = "0.3.4"
 
 [build-dependencies]
