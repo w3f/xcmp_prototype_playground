@@ -9,6 +9,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 mod weights;
 pub mod xcm_config;
 
+use cumulus_primitives_core::ParaId;
 use sp_core::Hasher;
 
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
@@ -38,7 +39,7 @@ use frame_support::{
 		constants::WEIGHT_REF_TIME_PER_SECOND, ConstantMultiplier, Weight, WeightToFeeCoefficient,
 		WeightToFeeCoefficients, WeightToFeePolynomial,
 	},
-	PalletId, IterableStorageDoubleMap,
+	PalletId,
 };
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
@@ -46,6 +47,7 @@ use frame_system::{
 };
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 use pallet_xcmp_message_stuffer::XcmpMessageProvider;
+use cumulus_pallet_xcmp_queue::OutboundXcmpMessages;
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
 use xcm_config::{RelayLocation, XcmConfig, XcmOriginToTransactDispatchOrigin};
@@ -467,15 +469,17 @@ pub struct XcmpDataProvider;
 impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 	type XcmpMessages = Hash;
 
-	fn get_xcmp_message(block_hash: Hash) -> Self::XcmpMessages {
-		// TODO: Temporarily to "Mock" the Xcmp messages we just hash the whole outbound queue
-		// <BlakeTwo256 as Hasher>::hash(block_hash.as_bytes())
-		let msgs: Vec<Vec<u8>> =
-		<XcmpQueue::Storage::OutboundXcmpMessages as IterableStorageDoubleMap<cumulus_primitives_core::ParaId, u16, Vec<u8>>>::iter().filter_map(|(_, outbound_xcmp)| {
-				outbound_xcmp
-			})
-			.collect();
-		<BlakeTwo256 as Hasher>::hash(msgs.as_slice())
+	fn get_xcmp_messages(block_hash: Hash, para_id: ParaId) -> Self::XcmpMessages {
+		// TODO: Temporarily we just hash all the messages to a particular
+		// Parachain per block and stick that into the mmr leaf
+		let mut msg_buffer = Vec::new();
+		let mut counter = 0u16;
+		while let Ok(buffer) = OutboundXcmpMessages::<Runtime>::try_get(para_id, counter) {
+			msg_buffer.extend_from_slice(&buffer[..]);
+			counter += 1;
+		}
+
+		BlakeTwo256::hash(&msg_buffer[..])
 	}
 }
 
@@ -494,19 +498,45 @@ parameter_types! {
 	/// Hence we expect `major` to be changed really rarely (think never).
 	/// See [`MmrLeafVersion`] type documentation for more details.
 	pub LeafVersion: MmrLeafVersion = MmrLeafVersion::new(0, 0);
+
+	pub ParaAIdentifier: ParaId = ParaId::from(1u32);
 }
 
-impl pallet_xcmp_message_stuffer::Config for Runtime {
+type ParaAChannel = pallet_xcmp_message_stuffer::Instance1;
+impl pallet_xcmp_message_stuffer::Config<ParaAChannel> for Runtime {
+	type ParaIdentifier = ParaAIdentifier;
 	type RuntimeEvent = RuntimeEvent;
 	type LeafVersion = LeafVersion;
 	type XcmpDataProvider = XcmpDataProvider;
 }
 
-impl pallet_mmr::Config for Runtime {
-	const INDEXING_PREFIX: &'static [u8] = pallet_mmr::primitives::INDEXING_PREFIX;
+type ParaAMmr = pallet_mmr::Instance1;
+impl pallet_mmr::Config<ParaAMmr> for Runtime {
+	const INDEXING_PREFIX: &'static [u8] = b"para_a_mmr";
 	type OnNewRoot = pallet_xcmp_message_stuffer::OnNewRootSatisfier<Runtime>;
 	type Hashing = Keccak256;
-	type LeafData = pallet_xcmp_message_stuffer::Pallet<Runtime>;
+	type LeafData = pallet_xcmp_message_stuffer::Pallet<Runtime, ParaAChannel>;
+	type WeightInfo = ();
+}
+
+parameter_types! {
+	pub ParaBIdentifier: ParaId = ParaId::from(2u32);
+}
+
+type ParaBChannel = pallet_xcmp_message_stuffer::Instance2;
+impl pallet_xcmp_message_stuffer::Config<ParaBChannel> for Runtime {
+	type ParaIdentifier = ParaBIdentifier;
+	type RuntimeEvent = RuntimeEvent;
+	type LeafVersion = LeafVersion;
+	type XcmpDataProvider = XcmpDataProvider;
+}
+
+type ParaBMmr = pallet_mmr::Instance2;
+impl pallet_mmr::Config<ParaBMmr> for Runtime {
+	const INDEXING_PREFIX: &'static [u8] = b"para_b_mmr";
+	type OnNewRoot = pallet_xcmp_message_stuffer::OnNewRootSatisfier<Runtime>;
+	type Hashing = Keccak256;
+	type LeafData = pallet_xcmp_message_stuffer::Pallet<Runtime, ParaBChannel>;
 	type WeightInfo = ();
 }
 
@@ -540,7 +570,10 @@ construct_runtime!(
 		CumulusXcm: cumulus_pallet_xcm = 32,
 		DmpQueue: cumulus_pallet_dmp_queue = 33,
 
-		MsgStuffer: pallet_xcmp_message_stuffer = 50,
+		MsgStufferParaA: pallet_xcmp_message_stuffer::<Instance1> = 50,
+		MsgStufferParaB: pallet_xcmp_message_stuffer::<Instance2> = 51,
+		MmrParaA: pallet_mmr::<Instance1> = 52,
+		MmrParaB: pallet_mmr::<Instance2> = 53,
 	}
 );
 

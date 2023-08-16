@@ -48,7 +48,7 @@ fn verify_messages_stuffing_works() {
 		MmrLeaf {
 			version: MmrLeafVersion::new(2, 8),
 			parent_number_and_hash: (0_u64, H256::repeat_byte(0x45)),
-			xcmp_msg: <BlakeTwo256 as Hasher>::hash(parent_hash.as_bytes())
+			xcmp_msgs: <BlakeTwo256 as Hasher>::hash(parent_hash.as_bytes())
 		}
 	);
 
@@ -63,7 +63,7 @@ fn verify_messages_stuffing_works() {
 		MmrLeaf {
 			version: MmrLeafVersion::new(2, 8),
 			parent_number_and_hash: (1_u64, H256::repeat_byte(0x45)),
-			xcmp_msg: <BlakeTwo256 as Hasher>::hash(parent_hash.as_bytes())
+			xcmp_msgs: <BlakeTwo256 as Hasher>::hash(parent_hash.as_bytes())
 		}
 	);
 }

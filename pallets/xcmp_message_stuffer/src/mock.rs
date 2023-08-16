@@ -9,6 +9,8 @@ pub use sp_runtime::{
 use sp_core::Hasher;
 use sp_consensus_beefy::mmr::MmrLeafVersion;
 
+use cumulus_primitives_core::ParaId;
+
 pub use sp_io::TestExternalities;
 
 use crate::XcmpMessageProvider;
@@ -22,7 +24,7 @@ frame_support::construct_runtime!(
 	{
 		System: frame_system::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Mmr: pallet_mmr,
-		MsgStuffer: crate::{Pallet, Call, Storage, Event<T>},
+		MsgStuffer: crate,
 	}
 );
 
@@ -84,13 +86,18 @@ pub struct XcmpDataProvider;
 impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 	type XcmpMessages = Hash;
 
-	fn get_xcmp_message(block_hash: Hash) -> Self::XcmpMessages {
+	fn get_xcmp_messages(block_hash: Hash, para_id: ParaId) -> Self::XcmpMessages {
 		// TODO: Temporarily to "Mock" the Xcmp message we just place the hash of the block hash
 		<BlakeTwo256 as Hasher>::hash(block_hash.as_bytes())
 	}
 }
 
+parameter_types! {
+	pub ParaAIdentifier: ParaId = ParaId::from(1u32);
+}
+
 impl crate::Config for Test {
+	type ParaIdentifier = ParaAIdentifier;
 	type RuntimeEvent = RuntimeEvent;
 	type LeafVersion = LeafVersion;
 	type XcmpDataProvider = XcmpDataProvider;
