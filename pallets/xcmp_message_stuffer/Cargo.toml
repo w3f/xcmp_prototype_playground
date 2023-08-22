@@ -25,7 +25,7 @@ sp-core = { git = "https://github.com/paritytech/substrate", default-features = 
 cumulus-primitives-core = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
 
 [dev-dependencies]
-serde = { version = "1.0.163" }
+serde = { version = "1.0.185" }
 
 # Substrate
 sp-io = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
