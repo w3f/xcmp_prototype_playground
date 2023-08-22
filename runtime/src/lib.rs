@@ -470,8 +470,9 @@ impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 	type XcmpMessages = Hash;
 
 	fn get_xcmp_messages(block_hash: Hash, para_id: ParaId) -> Self::XcmpMessages {
-		// TODO: Temporarily we just hash all the messages to a particular
-		// Parachain per block and stick that into the mmr leaf
+		// TODO: Temporarily we aggregate all the fragments destined to a particular
+		// Parachain per block and hash them and stick that into the mmr otherwise need a way
+		// of adding multiple MMR leaves per block to the MMR (Which for now means editing the mmr impl?)
 		let mut msg_buffer = Vec::new();
 		let mut counter = 0u16;
 		while let Ok(buffer) = OutboundXcmpMessages::<Runtime>::try_get(para_id, counter) {
@@ -479,6 +480,7 @@ impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 			counter += 1;
 		}
 
+		// TODO: Remove this default and add in some kind of Error/Default if there are no XCMP messages to insert into the MMR?
 		BlakeTwo256::hash(&msg_buffer[..])
 	}
 }
