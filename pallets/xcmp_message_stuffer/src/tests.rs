@@ -41,10 +41,6 @@ fn init_block(block: u64) {
 	MsgStufferB::on_initialize(block);
 }
 
-fn finalize_queue(block: u64) {
-	XcmpQueue::on_finalize(block);
-}
-
 #[test]
 fn verify_messages_stuffing_default_works() {
 	fn node_offchain_key_a(pos: usize, parent_hash: H256) -> Vec<u8> {
