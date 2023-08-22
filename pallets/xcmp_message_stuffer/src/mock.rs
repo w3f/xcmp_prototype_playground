@@ -234,11 +234,10 @@ impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 		// of adding multiple MMR leaves per block to the MMR (Which for now means editing the mmr impl?)
 		let mut msg_buffer = Vec::new();
 		let mut counter = 0u16;
-		// while let Ok(buffer) = OutboundXcmpMessages::<Test>::try_get(para_id, counter) {
-		// 	msg_buffer.extend_from_slice(&buffer[..]);
-		// 	counter += 1;
-		// 	// msg_buffer.extend_from_slice(&vec![1,2,3,4,5,6]);
-		// }
+		while let Ok(buffer) = OutboundXcmpMessages::<Test>::try_get(para_id, counter) {
+			msg_buffer.extend_from_slice(&buffer[..]);
+			counter += 1;
+		}
 
 		// TODO: Remove this default and add in some kind of Error/Default if there are no XCMP messages to insert into the MMR?
 		BlakeTwo256::hash(&msg_buffer[..])
