@@ -22,6 +22,8 @@ frame-system = { git = "https://github.com/paritytech/substrate", default-featur
 pallet-mmr = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
 sp-consensus-beefy = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
 sp-core = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
+
+# Cumulus
 cumulus-primitives-core = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
 
 [dev-dependencies]
@@ -30,6 +32,17 @@ serde = { version = "1.0.163" }
 # Substrate
 sp-io = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
 sp-runtime = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
+pallet-balances = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
+
+# Polkadot
+polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
+xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
+xcm-executor = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
+xcm-builder = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
+
+# Cumulus
+cumulus-pallet-xcmp-queue = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
+cumulus-pallet-parachain-system = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
 
 [features]
 default = ["std"]
