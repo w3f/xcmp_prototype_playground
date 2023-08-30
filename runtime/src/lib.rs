@@ -511,6 +511,15 @@ impl pallet_xcmp_message_stuffer::Config<ParaAChannel> for Runtime {
 	type LeafVersion = LeafVersion;
 	type XcmpDataProvider = XcmpDataProvider;
 }
+// /// MMR helper types.
+// mod mmr {
+// 	use super::Runtime;
+// 	pub use pallet_mmr::Instance1::primitives::*;
+
+// 	pub type Leaf = <<Runtime as pallet_mmr::Config>::LeafData as LeafDataProvider>::LeafData;
+// 	pub type Hashing = <Runtime as pallet_mmr::Config>::Hashing;
+// 	pub type Hash = <Hashing as sp_runtime::traits::Hash>::Output;
+// }
 
 type ParaAMmr = pallet_mmr::Instance1;
 impl pallet_mmr::Config<ParaAMmr> for Runtime {
@@ -574,8 +583,8 @@ construct_runtime!(
 
 		MsgStufferParaA: pallet_xcmp_message_stuffer::<Instance1> = 50,
 		MsgStufferParaB: pallet_xcmp_message_stuffer::<Instance2> = 51,
-		MmrParaA: pallet_mmr::<Instance1> = 52,
-		MmrParaB: pallet_mmr::<Instance2> = 53,
+		MmrParaA: pallet_mmr::<Instance1>::{Pallet, Storage} = 52,
+		MmrParaB: pallet_mmr::<Instance2>::{Pallet, Storage} = 53,
 	}
 );
 
@@ -804,6 +813,53 @@ impl_runtime_apis! {
 			Ok(batches)
 		}
 	}
+
+	// #[api_version(2)]
+	// impl mmr::MmrApi<Block, mmr::Hash, BlockNumber> for Runtime {
+	// 	fn mmr_root() -> Result<mmr::Hash, mmr::Error> {
+	// 		Ok(Mmr::mmr_root())
+	// 	}
+
+	// 	fn mmr_leaf_count() -> Result<mmr::LeafIndex, mmr::Error> {
+	// 		Ok(Mmr::mmr_leaves())
+	// 	}
+
+	// 	fn generate_proof(
+	// 		block_numbers: Vec<BlockNumber>,
+	// 		best_known_block_number: Option<BlockNumber>,
+	// 	) -> Result<(Vec<mmr::EncodableOpaqueLeaf>, mmr::Proof<mmr::Hash>), mmr::Error> {
+	// 		Mmr::generate_proof(block_numbers, best_known_block_number).map(
+	// 			|(leaves, proof)| {
+	// 				(
+	// 					leaves
+	// 						.into_iter()
+	// 						.map(|leaf| mmr::EncodableOpaqueLeaf::from_leaf(&leaf))
+	// 						.collect(),
+	// 					proof,
+	// 				)
+	// 			},
+	// 		)
+	// 	}
+
+	// 	fn verify_proof(leaves: Vec<mmr::EncodableOpaqueLeaf>, proof: mmr::Proof<mmr::Hash>)
+	// 		-> Result<(), mmr::Error>
+	// 	{
+	// 		let leaves = leaves.into_iter().map(|leaf|
+	// 			leaf.into_opaque_leaf()
+	// 			.try_decode()
+	// 			.ok_or(mmr::Error::Verify)).collect::<Result<Vec<mmr::Leaf>, mmr::Error>>()?;
+	// 		Mmr::verify_leaves(leaves, proof)
+	// 	}
+
+	// 	fn verify_proof_stateless(
+	// 		root: mmr::Hash,
+	// 		leaves: Vec<mmr::EncodableOpaqueLeaf>,
+	// 		proof: mmr::Proof<mmr::Hash>
+	// 	) -> Result<(), mmr::Error> {
+	// 		let nodes = leaves.into_iter().map(|leaf|mmr::DataOrHash::Data(leaf.into_opaque_leaf())).collect();
+	// 		pallet_mmr::verify_leaves_proof::<mmr::Hashing, _>(root, nodes, proof)
+	// 	}
+	// }
 }
 
 struct CheckInherents;

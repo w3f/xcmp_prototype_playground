@@ -8,15 +8,42 @@ use parity_scale_codec::{Decode, Encode};
 use runtime::{MmrParaA, Block, Header};
 use std::path::PathBuf;
 
+use sp_runtime::traits::Keccak256;
+
 use sp_core::H256;
 
 use tokio::task;
 use std::time::Duration;
 
-/// The default RPC endpoints for each
-const DEFAULT_ENDPOINT_PARA_SENDER: &str = "http://localhost:9933";
-const DEFAULT_ENDPOINT_PARA_RECEIVER: &str = "http://localhost:9944";
-const DEFAULT_ENDPOINT_RELAY: &str = "http://localhost:9955";
+use futures::StreamExt;
+use subxt::{OnlineClient, PolkadotConfig, backend::rpc::{RpcClient, RpcClientT}};
+
+use mmr_rpc::LeavesProof;
+
+// use subxt_signer::sr25519::dev;
+
+/// The default endpoints for each
+const DEFAULT_ENDPOINT_PARA_SENDER: &str = "ws://localhost:9933";
+const DEFAULT_RPC_ENDPOINT_PARA_SENDER: &str = "http://localhost:9933";
+const DEFAULT_ENDPOINT_PARA_RECEIVER: &str = "ws://localhost:9944";
+const DEFAULT_RPC_ENDPOINT_PARA_RECEIVER: &str = "http://localhost:9944";
+const DEFAULT_ENDPOINT_RELAY: &str = "ws://localhost:9955";
+const DEFAULT_RPC_ENDPOINT_RELAY: &str = "http://localhost:9955";
+
+#[derive(Clone, Debug)]
+pub struct MultiClient {
+	pub subxt_client: OnlineClient<PolkadotConfig>,
+	pub rpc_client: HttpClient,
+}
+
+impl MultiClient {
+	pub async fn new(endpoint: &str, rpc_endpoint: &str) -> anyhow::Result<Self> {
+		Ok(Self {
+			subxt_client: OnlineClient::<PolkadotConfig>::from_url(endpoint).await?,
+			rpc_client: HttpClientBuilder::default().build(rpc_endpoint)?,
+		})
+	}
+}
 
 #[derive(Debug)]
 pub enum ClientType {
@@ -49,41 +76,36 @@ async fn main() -> anyhow::Result<()> {
 
 	log::info!("Booting up");
 
-	let para_sender_client = HttpClientBuilder::default().build(DEFAULT_ENDPOINT_PARA_SENDER)?;
-	let para_receiver_client = HttpClientBuilder::default().build(DEFAULT_ENDPOINT_PARA_RECEIVER)?;
-	let relay_client = HttpClientBuilder::default().build(DEFAULT_ENDPOINT_RELAY)?;
+	let para_sender_api = MultiClient::new(DEFAULT_ENDPOINT_PARA_SENDER, DEFAULT_RPC_ENDPOINT_PARA_SENDER ).await?;
+	let para_receiver_api = MultiClient::new(DEFAULT_ENDPOINT_PARA_RECEIVER, DEFAULT_RPC_ENDPOINT_PARA_RECEIVER).await?;
+	let relay_api = MultiClient::new(DEFAULT_ENDPOINT_RELAY, DEFAULT_RPC_ENDPOINT_RELAY).await?;
 
-	// TODO: Add the rest of the clients and print to validate
-	let subscribe = subscribe_all_heads(&vec![para_sender_client]).await?;
+	let gen_mmr_proof = generate_mmr_proof(&para_sender_api).await?;
+
+	let subscribe = log_all_blocks(&vec![para_sender_api, para_receiver_api, relay_api]).await?;
 
 	std::future::pending::<()>().await;
 	Ok(())
 }
 
-/// For now just print all heads from all clients
-async fn subscribe_all_heads(clients: &[HttpClient]) -> anyhow::Result<()> {
-	// Call correct RPC for each client and print headers
+async fn log_all_blocks(clients: &[MultiClient]) -> anyhow::Result<()> {
 	for (client_index, client) in clients.iter().enumerate() {
 		let client = client.clone();
-
+		
 		task::spawn(async move {
 			let client_type = ClientType::from_index(client_index);
-
-			let genesis_hash = node_get_block_hash(0, &client).await?.ok_or(RelayerError::Default)?;
-			log::info!("got genesis hash {:?}", genesis_hash);
-
-			let mut head = node_get_block(Some(genesis_hash), &client).await?.ok_or(RelayerError::Default)?.header;
-			log::info!("got genesis head {:?}", head);
-
-			loop {
-				tokio::time::sleep(Duration::from_secs(5)).await;
-
-				let curr_head = node_get_block(None, &client).await?.ok_or(RelayerError::Default)?.header;
-				if head != curr_head {
-					log::info!("Block Header for {:?} is {:?}", client_type, curr_head);
-				}
-				head = curr_head;
+			let mut blocks_sub = client.subxt_client.blocks().subscribe_best().await?;
+			
+			while let Some(block) = blocks_sub.next().await {
+				let block = block?;
+				
+				let block_number = block.header().number;
+				let block_hash = block.hash();
+				
+				log::info!("Block for {:?}: is block_hash {:?}, block_number {:?}",
+					client_type, block.hash(), block.number());
 			}
+
 			Ok::<(), anyhow::Error>(())
 		});
 	}
@@ -91,37 +113,15 @@ async fn subscribe_all_heads(clients: &[HttpClient]) -> anyhow::Result<()> {
 	Ok(())
 }
 
-/// Typed helper to get the Node's block hash at a particular height
-async fn node_get_block_hash(height: u32, client: &HttpClient) -> anyhow::Result<Option<H256>> {
-    let params = rpc_params![Some(height)];
-    let rpc_response: Option<String> = client.request("chain_getBlockHash", params).await?;
-    let maybe_hash = rpc_response.map(|s| crate::h256_from_string(&s).unwrap());
-    Ok(maybe_hash)
-}
+// Call generate mmr proof for sender
+async fn generate_mmr_proof(client: &MultiClient) -> anyhow::Result<LeavesProof<Keccak256>> {
+	let block = client.subxt_client.blocks().at_latest().await?;
 
-/// Parse a string into an H256 that represents a public key
-fn h256_from_string(s: &str) -> anyhow::Result<H256> {
-    let s = strip_0x_prefix(s);
+	let params = rpc_params![vec![block.number()]];
 
-    let mut bytes: [u8; 32] = [0; 32];
-    hex::decode_to_slice(s, &mut bytes as &mut [u8])
-        .map_err(|_| RelayerError::Default)?;
-    Ok(H256::from(bytes))
-}
-
-/// Typed helper to get the node's full block at a particular hash
-async fn node_get_block(hash: Option<H256>, client: &HttpClient) -> anyhow::Result<Option<Block>> {
-	let mut params = rpc_params![];
-	if let Some(block_hash) = hash {
-		let s = hex::encode(block_hash.0);
-		params = rpc_params![s];
-	}
-
-    let rpc_response: Option<serde_json::Value> = client.request("chain_getBlock", params).await?;
-
-    Ok(rpc_response
-        .and_then(|value| value.get("block").cloned())
-        .and_then(|maybe_block| serde_json::from_value(maybe_block).unwrap_or(None)))
+	let request: Option<LeavesProof<Keccak256>> = client.rpc_client.request("mmr_generateProof", params).await?;
+	let proof = request.ok_or(RelayerError::Default)?;
+	Ok(proof)
 }
 
 /// Takes a string and checks for a 0x prefix. Returns a string without a 0x prefix.
