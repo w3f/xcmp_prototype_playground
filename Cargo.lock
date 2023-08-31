@@ -7442,6 +7442,7 @@ dependencies = [
  "sp-consensus-beefy 4.0.0-dev (git+https://github.com/paritytech/substrate)",
  "sp-core 21.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-inherents 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
+ "sp-mmr-primitives 4.0.0-dev (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-offchain",
  "sp-runtime 24.0.0 (git+https://github.com/paritytech/substrate?branch=polkadot-v1.0.0)",
  "sp-session",
