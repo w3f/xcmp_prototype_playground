@@ -55,7 +55,7 @@ Q:
 
 // Note: Not actual type just for explanation purposes
 pub struct RelayerProof {
-    message: XcmMessage,
+    message: XcmpMessage,
     mmr_root: Hash,
     message_proof: MmrProof,
     relay_proof: RelayProof, 
