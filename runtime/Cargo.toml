@@ -5,19 +5,19 @@ authors = ["Anonymous"]
 description = "A new Cumulus FRAME-based Substrate Runtime, ready for hacking together a parachain."
 license = "Unlicense"
 homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/cumulus/"
+repository = "https://github.com/coax1d/polkadot-sdk"
 edition = "2021"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
 [build-dependencies]
-substrate-wasm-builder = { git = "https://github.com/paritytech/substrate", optional = true, branch = "polkadot-v1.0.0" }
+substrate-wasm-builder = { git = "https://github.com/coax1d/polkadot-sdk", optional = true, branch = "andrews_branch" }
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive"] }
 hex-literal = { version = "0.4.1", optional = true }
-log = { version = "0.4.19", default-features = false }
+log = { version = "0.4.20", default-features = false }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
 smallvec = "1.11.0"
 
@@ -25,57 +25,57 @@ smallvec = "1.11.0"
 pallet-xcmp-message-stuffer = { path = "../pallets/xcmp_message_stuffer", default-features = false }
 
 # Substrate
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true, branch = "polkadot-v1.0.0" }
-frame-executive = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-frame-support = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-frame-system = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-frame-system-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true, branch = "polkadot-v1.0.0" }
-frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-frame-try-runtime = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true, branch = "polkadot-v1.0.0" }
-pallet-aura = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-authorship = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-balances = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-mmr = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-session = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-sudo = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-timestamp = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-transaction-payment = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-api = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-block-builder = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-consensus-aura = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-consensus-beefy = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-beefy-primitives = { package = "sp-consensus-beefy", git = "https://github.com/paritytech/substrate", default-features = false }
-sp-core = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-inherents = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-offchain = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-runtime = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-session = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-std = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-transaction-pool = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-version = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-mmr-primitives = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
+frame-benchmarking = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, optional = true, branch = "andrews_branch" }
+frame-executive = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+frame-support = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+frame-system = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+frame-system-benchmarking = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, optional = true, branch = "andrews_branch" }
+frame-system-rpc-runtime-api = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+frame-try-runtime = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, optional = true, branch = "andrews_branch" }
+pallet-aura = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+pallet-authorship = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+pallet-balances = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+pallet-mmr = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+pallet-session = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+pallet-sudo = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+pallet-timestamp = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+pallet-transaction-payment = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-api = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-block-builder = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-consensus-aura = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-consensus-beefy = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+beefy-primitives = { package = "sp-consensus-beefy", git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-core = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-inherents = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-offchain = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-runtime = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-session = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-std = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-transaction-pool = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-version = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-mmr-primitives = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
 
 # Polkadot
-pallet-xcm = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v1.0.0" }
-polkadot-parachain = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v1.0.0" }
-polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v1.0.0" }
-xcm = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v1.0.0" }
-xcm-builder = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v1.0.0" }
-xcm-executor = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v1.0.0" }
+pallet-xcm = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+polkadot-parachain-primitives = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+polkadot-runtime-common = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+xcm = { package = "staging-xcm", git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch" }
+xcm-executor = { package = "staging-xcm", git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch" }
+xcm-builder = { package = "staging-xcm-executor", git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch" }
 
 # Cumulus
-cumulus-pallet-aura-ext = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
-cumulus-pallet-dmp-queue = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
-cumulus-pallet-parachain-system = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
-cumulus-pallet-session-benchmarking = {git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false, version = "3.0.0"}
-cumulus-pallet-xcm = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
-cumulus-pallet-xcmp-queue = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
-cumulus-primitives-core = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
-cumulus-primitives-timestamp = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
-cumulus-primitives-utility = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
-pallet-collator-selection = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
-parachain-info = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
+cumulus-pallet-aura-ext = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false }
+cumulus-pallet-dmp-queue = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false }
+cumulus-pallet-parachain-system = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false }
+cumulus-pallet-session-benchmarking = {git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false, version = "3.0.0"}
+cumulus-pallet-xcm = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false }
+cumulus-pallet-xcmp-queue = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false }
+cumulus-primitives-core = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false }
+cumulus-primitives-timestamp = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false }
+cumulus-primitives-utility = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false }
+pallet-collator-selection = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false }
+parachain-info = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false }
 
 [features]
 default = [
@@ -111,7 +111,7 @@ std = [
 	"pallet-transaction-payment/std",
 	"pallet-xcm/std",
 	"parachain-info/std",
-	"polkadot-parachain/std",
+	"polkadot-parachain-primitives/std",
 	"polkadot-runtime-common/std",
 	"sp-api/std",
 	"sp-block-builder/std",

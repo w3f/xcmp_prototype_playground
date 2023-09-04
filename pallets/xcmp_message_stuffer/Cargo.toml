@@ -5,7 +5,7 @@ description = "FRAME pallet stuffing xcm messages into an xcmp message which the
 version = "0.1.0"
 license = "Unlicense"
 homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/substrate/"
+repository = "https://github.com/coax1d/polkadot-sdk"
 edition = "2021"
 
 [package.metadata.docs.rs]
@@ -16,33 +16,33 @@ codec = { package = "parity-scale-codec", version = "3.0.0", features = ["derive
 scale-info = { version = "2.2.0", default-features = false, features = ["derive"] }
 
 # Substrate
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true, branch = "polkadot-v1.0.0" }
-frame-support = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-frame-system = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-mmr = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-consensus-beefy = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-core = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
+frame-benchmarking = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, optional = true, branch = "andrews_branch" }
+frame-support = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+frame-system = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+pallet-mmr = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-consensus-beefy = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-core = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
 
 # Cumulus
-cumulus-primitives-core = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
+cumulus-primitives-core = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch", default-features = false }
 
 [dev-dependencies]
-serde = { version = "1.0.163" }
+serde = { version = "1.0.188" }
 
 # Substrate
-sp-io = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-runtime = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-balances = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
+sp-io = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+sp-runtime = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
+pallet-balances = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "andrews_branch" }
 
 # Polkadot
-polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
-xcm-executor = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
-xcm-builder = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
+polkadot-runtime-common = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch" }
+xcm = { package = "staging-xcm", git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch" }
+xcm-executor = { package = "staging-xcm", git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch" }
+xcm-builder = { package = "staging-xcm-executor", git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch" }
 
 # Cumulus
-cumulus-pallet-xcmp-queue = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
-cumulus-pallet-parachain-system = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
+cumulus-pallet-xcmp-queue = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch" }
+cumulus-pallet-parachain-system = { git = "https://github.com/coax1d/polkadot-sdk", branch = "andrews_branch" }
 
 [features]
 default = ["std"]
@@ -51,6 +51,7 @@ std = [
 	"codec/std",
 	"cumulus-primitives-core/std",
 	"scale-info/std",
+	"pallet-mmr/std",
 	"sp-consensus-beefy/std",
 	"sp-core/std",
 	"frame-benchmarking/std",

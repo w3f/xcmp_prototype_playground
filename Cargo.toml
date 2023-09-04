@@ -8,3 +8,8 @@ members = [
 	"runtime",
     "xcmp_relayer",
 ]
+resolver = "2"
+
+[patch."https://github.com/coax1d/polkadot-sdk"]
+wasm-opt = { version = "=0.112.0" }
+wasm-opt-sys = { version = "=0.112.0" }
