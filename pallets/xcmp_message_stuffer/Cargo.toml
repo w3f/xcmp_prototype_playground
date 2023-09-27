@@ -12,49 +12,55 @@ edition = "2021"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "3.0.0", features = ["derive"], default-features = false }
-scale-info = { version = "2.2.0", default-features = false, features = ["derive"] }
+parity-scale-codec = { workspace = true, default-features = false, features = ["derive"] }
+scale-info = { default-features = false, features = ["derive"], workspace = true }
 
 # Substrate
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true, branch = "polkadot-v1.0.0" }
-frame-support = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-frame-system = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-mmr = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-consensus-beefy = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-core = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
+frame-benchmarking = { workspace = true, default-features = false, optional = true }
+frame-support = { workspace = true, default-features = false }
+frame-system = { workspace = true, default-features = false }
+pallet-mmr = { workspace = true, default-features = false }
+sp-consensus-beefy = { workspace = true, default-features = false }
+sp-core = { workspace = true, default-features = false }
 
 # Cumulus
-cumulus-primitives-core = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch", default-features = false }
+cumulus-primitives-core = { workspace = true, default-features = false }
 
 [dev-dependencies]
-serde = { version = "1.0.163" }
+serde = { workspace = true }
 
 # Substrate
-sp-io = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-sp-runtime = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
-pallet-balances = { git = "https://github.com/paritytech/substrate", default-features = false, branch = "polkadot-v1.0.0" }
+sp-io = { workspace = true, default-features = false }
+sp-runtime = { workspace = true, default-features = false }
+pallet-balances = { workspace = true, default-features = false }
 
 # Polkadot
-polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
-xcm-executor = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
-xcm-builder = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0" }
+xcm = { workspace = true }
+xcm-executor = { workspace = true }
+xcm-builder = { workspace = true }
 
 # Cumulus
-cumulus-pallet-xcmp-queue = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
-cumulus-pallet-parachain-system = { git = "https://github.com/coax1d/cumulus.git", branch = "andrews_branch" }
+cumulus-pallet-xcmp-queue = { workspace = true, features = ["std"] }
+cumulus-pallet-parachain-system = { workspace = true }
 
 [features]
 default = ["std"]
 runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]
 std = [
-	"codec/std",
-	"cumulus-primitives-core/std",
-	"scale-info/std",
-	"sp-consensus-beefy/std",
-	"sp-core/std",
+	"parity-scale-codec/std",
+	"cumulus-pallet-parachain-system/std",
+    "cumulus-primitives-core/std",
 	"frame-benchmarking/std",
 	"frame-support/std",
+    "pallet-mmr/std",
 	"frame-system/std",
+	"scale-info/std",
+	"sp-core/std",
+	"sp-io/std",
+	"sp-runtime/std",
+    "sp-consensus-beefy/std",
+	"xcm/std",
+	"xcm-executor/std",
+	"xcm-builder/std",
 ]
 try-runtime = [ "frame-support/try-runtime" ]
