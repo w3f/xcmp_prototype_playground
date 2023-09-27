@@ -28,12 +28,10 @@ type Hash = sp_core::H256;
 frame_support::construct_runtime!(
 	pub enum Test
 	{
-		System: frame_system::{Pallet, Call, Config<T>, Storage, Event<T>},
+		System: frame_system,
 		Balances: pallet_balances,
-		ParachainSystem: cumulus_pallet_parachain_system::{
-			Pallet, Call, Config<T>, Storage, Inherent, Event<T>, ValidateUnsigned,
-		},
-		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>},
+		ParachainSystem: cumulus_pallet_parachain_system,
+		XcmpQueue: cumulus_pallet_xcmp_queue,
 		MmrParaA: pallet_mmr::<Instance1> = 52,
 		MmrParaB: pallet_mmr::<Instance2> = 53,
 		MsgStufferA: crate::<Instance1> = 54,

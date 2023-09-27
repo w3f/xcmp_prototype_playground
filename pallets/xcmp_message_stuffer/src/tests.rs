@@ -9,7 +9,7 @@ use sp_consensus_beefy::{
 	mmr::MmrLeafVersion,
 };
 
-use codec::{Encode, Decode};
+use sp_runtime::codec::{Encode, Decode};
 use frame_support::traits::{OnInitialize, OnFinalize};
 
 use sp_core::Hasher;

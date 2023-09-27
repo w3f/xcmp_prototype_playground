@@ -8,3 +8,142 @@ members = [
 	"runtime",
     "xcmp_relayer",
 ]
+resolver = "2"
+
+[workspace.dependencies]
+# Generic dependencies
+color-print = "0.3.4"
+clap = "4.3.0"
+hex-literal = "0.4.1"
+jsonrpsee = "0.16.2"
+log = { version = "0.4", default-features = false }
+parity-scale-codec = { version = "3.0.0", default-features = false, features = ["derive"] }
+parity-util-mem = "0.12.0"
+scale-info = { version = "2.2.0", default-features = false, features = ["derive"] }
+serde = "1.0"
+
+# Procedural macro dependencies
+proc-macro2 = "1.0.67"
+quote = "1.0.23"
+syn = "2.0.15"
+
+# Core-only dependencies
+array-bytes = "6.0.0"
+
+
+anyhow = "1.0.69"
+directories = "5.0.0"
+env_logger = "0.10.0"
+futures = "0.3"
+hex = "0.4.3"
+serde_json = "1.0"
+smallvec = "1.11.0"
+tokio = "1.25.0"
+rand = { version = "0.8.5", default-features = false, features = [ "std_rng" ] }
+
+# Local
+pallet-xcmp-message-stuffer = { path = "pallets/xcmp_message_stuffer", default-features = false }
+
+# Node-only dependencies
+substrate-build-script-utils = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+
+# Runtime-only dependencies
+substrate-wasm-builder = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+
+# Substrate primitives and client
+sc-basic-authorship = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-cli = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-client-api = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-consensus = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-consensus-aura = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-consensus-grandpa = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-executor = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-keystore = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-network = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-rpc = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-rpc-api = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-service = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-telemetry = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-transaction-pool = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-transaction-pool-api = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-api = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-application-crypto = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-block-builder = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-blockchain = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-consensus = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-consensus-aura = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-consensus-grandpa = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-core = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-debug-derive = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-inherents = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-io = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-keyring = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-keystore = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-runtime = { default-features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-session = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-std = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-storage = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-timestamp = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-transaction-pool = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sp-version = { default-features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+
+# Node Deps
+frame-benchmarking-cli = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+pallet-transaction-payment-rpc = { default-features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-chain-spec = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-offchain = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-network-sync = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-sysinfo = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+sc-tracing = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+substrate-frame-rpc-system = { default-features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+substrate-prometheus-endpoint = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+
+try-runtime-cli = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+frame-benchmarking = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+frame-executive = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+frame-support = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+frame-system = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+frame-system-benchmarking = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+frame-system-rpc-runtime-api = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+frame-try-runtime = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+pallet-aura = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+pallet-authorship = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+pallet-balances = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+pallet-mmr = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+pallet-session = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+pallet-sudo = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+pallet-timestamp = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+pallet-transaction-payment = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+sp-consensus-beefy = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+sp-offchain = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+
+# Polkadot
+polkadot-cli = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+polkadot-primitives = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
+pallet-xcm = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+polkadot-parachain = { package = "polkadot-parachain-primitives", git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+polkadot-runtime-common = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+xcm = { package = "staging-xcm", git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+
+# Cumulus
+cumulus-client-cli = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+cumulus-client-consensus-aura = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+cumulus-client-consensus-common = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+cumulus-client-service = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+cumulus-relay-chain-interface = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+cumulus-primitives-parachain-inherent = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
+
+cumulus-pallet-aura-ext = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
+cumulus-pallet-dmp-queue = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
+cumulus-pallet-parachain-system = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
+cumulus-pallet-session-benchmarking = {git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
+cumulus-pallet-xcm = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
+cumulus-pallet-xcmp-queue = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
+cumulus-primitives-core = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
+cumulus-primitives-timestamp = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
+cumulus-primitives-utility = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
+pallet-collator-selection = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
+parachain-info = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }

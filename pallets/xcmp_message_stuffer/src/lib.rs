@@ -4,7 +4,7 @@ pub use pallet::*;
 use pallet_mmr::{LeafDataProvider, ParentNumberAndHash};
 use sp_consensus_beefy::mmr::MmrLeafVersion;
 
-use frame_support::{dispatch::{DispatchResult, Vec}, pallet_prelude::*,};
+use frame_support::{dispatch::{DispatchResult}, pallet_prelude::*,};
 use frame_system::pallet_prelude::*;
 use cumulus_primitives_core::ParaId;
 
@@ -18,7 +18,7 @@ mod tests;
 mod benchmarking;
 
 pub trait XcmpMessageProvider<Hash> {
-	type XcmpMessages: Encode + Decode + frame_support::dispatch::fmt::Debug + PartialEq + Clone;
+	type XcmpMessages: Encode + Decode + scale_info::prelude::fmt::Debug + PartialEq + Clone;
 
 	fn get_xcmp_messages(block_hash: Hash, para_id: ParaId) -> Self::XcmpMessages;
 }
