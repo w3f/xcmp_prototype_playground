@@ -162,7 +162,7 @@ impl WeightToFeePolynomial for WeightToFee {
 /// to even the core data structures.
 pub mod opaque {
 	use super::*;
-	use sp_runtime::{generic, traits::BlakeTwo256};
+	use sp_runtime::{generic, traits::{BlakeTwo256, Hash as HashT}};
 
 	pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
 	/// Opaque block header type.
@@ -171,6 +171,8 @@ pub mod opaque {
 	pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 	/// Opaque block identifier type.
 	pub type BlockId = generic::BlockId<Block>;
+	/// Opaque block hash type.
+	pub type Hash = <BlakeTwo256 as HashT>::Output;
 }
 
 impl_opaque_keys! {
@@ -467,9 +469,10 @@ impl pallet_collator_selection::Config for Runtime {
 
 pub struct XcmpDataProvider;
 impl XcmpMessageProvider<Hash> for XcmpDataProvider {
-	type XcmpMessages = Hash;
+	type XcmpMessages = Vec<u8>;
 
 	fn get_xcmp_messages(block_hash: Hash, para_id: ParaId) -> Self::XcmpMessages {
+		use cumulus_pallet_xcmp_queue::OutboundXcmpMessages;
 		// TODO: Temporarily we aggregate all the fragments destined to a particular
 		// Parachain per block and hash them and stick that into the mmr otherwise need a way
 		// of adding multiple MMR leaves per block to the MMR (Which for now means editing the mmr impl?)
@@ -480,8 +483,7 @@ impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 			counter += 1;
 		}
 
-		// TODO: Remove this default and add in some kind of Error/Default if there are no XCMP messages to insert into the MMR?
-		BlakeTwo256::hash(&msg_buffer[..])
+		msg_buffer
 	}
 }
 
@@ -510,6 +512,7 @@ impl pallet_xcmp_message_stuffer::Config<ParaAChannel> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type LeafVersion = LeafVersion;
 	type XcmpDataProvider = XcmpDataProvider;
+	type RelayerOrigin = EnsureRoot<AccountId>;
 }
 
 type ParaAMmr = pallet_mmr::Instance1;
@@ -531,6 +534,7 @@ impl pallet_xcmp_message_stuffer::Config<ParaBChannel> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type LeafVersion = LeafVersion;
 	type XcmpDataProvider = XcmpDataProvider;
+	type RelayerOrigin = EnsureRoot<AccountId>;
 }
 
 type ParaBMmr = pallet_mmr::Instance2;
@@ -590,6 +594,19 @@ mod benches {
 		[pallet_collator_selection, CollatorSelection]
 		[cumulus_pallet_xcmp_queue, XcmpQueue]
 	);
+}
+
+mod mmr {
+	use super::Runtime;
+	pub use pallet_mmr::primitives::*;
+	pub use sp_mmr_primitives::{LeafIndex, Error, EncodableOpaqueLeaf, Proof};
+
+	pub type LeafA = <<Runtime as pallet_mmr::Config<crate::ParaAMmr>>::LeafData as LeafDataProvider>::LeafData;
+	pub type LeafB = <<Runtime as pallet_mmr::Config<crate::ParaBMmr>>::LeafData as LeafDataProvider>::LeafData;
+	pub type Hashing = <Runtime as pallet_mmr::Config<crate::ParaAMmr>>::Hashing;
+	// pub type HashingB = <Runtime as pallet_mmr::Config<crate::ParaBMmr>>::Hashing;
+	pub type Hash = <Hashing as sp_runtime::traits::Hash>::Output;
+	// pub type HashB = <HashingB as sp_runtime::traits::Hash>::Output;
 }
 
 impl_runtime_apis! {
@@ -685,6 +702,77 @@ impl_runtime_apis! {
 			System::account_nonce(account)
 		}
 	}
+
+	#[api_version(3)]
+	impl mmr::MmrApi<Block, mmr::Hash, BlockNumber> for Runtime {
+		fn mmr_root(mmr_id: u64) -> Result<mmr::Hash, mmr::Error> {
+			match mmr_id {
+				0 => Ok(MmrParaA::mmr_root()),
+				1 => Ok(MmrParaB::mmr_root()),
+				_ => Err(mmr::Error::GetRoot)
+			}
+		}
+
+		fn mmr_leaf_count() -> Result<mmr::LeafIndex, mmr::Error> {
+			Ok(MmrParaA::mmr_leaves())
+		}
+
+		fn generate_proof(
+			block_numbers: Vec<BlockNumber>,
+			best_known_block_number: Option<BlockNumber>,
+			mmr_id: u64,
+		) -> Result<(Vec<mmr::EncodableOpaqueLeaf>, mmr::Proof<mmr::Hash>), mmr::Error> {
+			match mmr_id {
+				0 => {
+					MmrParaA::generate_proof(block_numbers, best_known_block_number).map(
+						|(leaves, proof)| {
+							(
+								leaves
+									.into_iter()
+									.map(|leaf| mmr::EncodableOpaqueLeaf::from_leaf(&leaf))
+									.collect(),
+								proof,
+							)
+						},
+					)
+				},
+				1 => {
+					MmrParaB::generate_proof(block_numbers, best_known_block_number).map(
+						|(leaves, proof)| {
+							(
+								leaves
+									.into_iter()
+									.map(|leaf| mmr::EncodableOpaqueLeaf::from_leaf(&leaf))
+									.collect(),
+								proof,
+							)
+						},
+					)
+				},
+				_ => Err(mmr::Error::GenerateProof)
+			}
+		}
+
+			// TODO: add in mmr_id here as well to know which Leaf Type to return
+			fn verify_proof(leaves: Vec<mmr::EncodableOpaqueLeaf>, proof: mmr::Proof<mmr::Hash>)
+				-> Result<(), mmr::Error>
+			{
+				let leaves = leaves.into_iter().map(|leaf|
+					leaf.into_opaque_leaf()
+					.try_decode()
+					.ok_or(mmr::Error::Verify)).collect::<Result<Vec<mmr::LeafA>, mmr::Error>>()?;
+				MmrParaA::verify_leaves(leaves, proof)
+			}
+
+			fn verify_proof_stateless(
+				root: mmr::Hash,
+				leaves: Vec<mmr::EncodableOpaqueLeaf>,
+				proof: mmr::Proof<mmr::Hash>
+			) -> Result<(), mmr::Error> {
+				let nodes = leaves.into_iter().map(|leaf|mmr::DataOrHash::Data(leaf.into_opaque_leaf())).collect();
+				pallet_mmr::verify_leaves_proof::<mmr::Hashing, _>(root, nodes, proof)
+			}
+		}
 
 	impl pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi<Block, Balance> for Runtime {
 		fn query_info(

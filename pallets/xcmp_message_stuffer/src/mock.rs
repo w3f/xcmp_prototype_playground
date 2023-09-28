@@ -219,12 +219,12 @@ parameter_types! {
 pub type MmrLeaf = crate::MmrLeaf<
 	frame_system::pallet_prelude::BlockNumberFor<Test>,
 	<Test as frame_system::Config>::Hash,
-	<Test as frame_system::Config>::Hash
+	Vec<u8>
 >;
 
 pub struct XcmpDataProvider;
 impl XcmpMessageProvider<Hash> for XcmpDataProvider {
-	type XcmpMessages = Hash;
+	type XcmpMessages = Vec<u8>;
 
 	fn get_xcmp_messages(block_hash: Hash, para_id: ParaId) -> Self::XcmpMessages {
 		use cumulus_pallet_xcmp_queue::OutboundXcmpMessages;
@@ -238,8 +238,7 @@ impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 			counter += 1;
 		}
 
-		// TODO: Remove this default and add in some kind of Error/Default if there are no XCMP messages to insert into the MMR?
-		BlakeTwo256::hash(&msg_buffer[..])
+		msg_buffer
 	}
 }
 
@@ -253,6 +252,7 @@ impl crate::Config<ParaAChannel> for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type LeafVersion = LeafVersion;
 	type XcmpDataProvider = XcmpDataProvider;
+	type RelayerOrigin = EnsureRoot<Self::AccountId>;
 }
 
 pub type ParaAMmr = pallet_mmr::Instance1;
@@ -274,6 +274,7 @@ impl crate::Config<ParaBChannel> for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type LeafVersion = LeafVersion;
 	type XcmpDataProvider = XcmpDataProvider;
+	type RelayerOrigin = EnsureRoot<Self::AccountId>;
 }
 
 pub type ParaBMmr = pallet_mmr::Instance2;
