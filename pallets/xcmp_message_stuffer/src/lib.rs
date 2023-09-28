@@ -7,6 +7,7 @@ use sp_consensus_beefy::mmr::MmrLeafVersion;
 use frame_support::{dispatch::{DispatchResult}, pallet_prelude::*,};
 use frame_system::pallet_prelude::*;
 use cumulus_primitives_core::ParaId;
+use sp_runtime::traits::{Hash as HashT};
 
 #[cfg(test)]
 mod mock;
@@ -24,7 +25,8 @@ pub trait XcmpMessageProvider<Hash> {
 }
 
 type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
-
+// TODO: Need the MmrProof to beable to seperate each leaf such that we can decode each XCMP message aggregate
+type MmrProof = ();
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -36,7 +38,8 @@ pub mod pallet {
 		type ParaIdentifier: Get<ParaId>;
 		type RuntimeEvent: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		type LeafVersion: Get<MmrLeafVersion>;
-		type XcmpDataProvider: XcmpMessageProvider<Self::Hash>; // TODO: Needs to be XCMP message commitment or the actual message?
+		type XcmpDataProvider: XcmpMessageProvider<Self::Hash>;
+		type RelayerOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 	}
 
 	#[pallet::pallet]
@@ -45,13 +48,35 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config<I>, I: 'static = ()> {
-		SomeEvent,
+		XcmpMessageSent {
+			msg_hash: T::Hash,
+			block_num: BlockNumberFor<T>,
+		},
 	}
 
 	// Errors inform users that something went wrong.
 	#[pallet::error]
 	pub enum Error<T, I = ()> {
-		SomeError,
+		XcmpProofNotValid,
+		XcmpProofAccepted,
+	}
+
+	#[pallet::call]
+	impl<T: Config<I>, I: 'static> Pallet<T, I> {
+
+		#[pallet::call_index(0)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn verify_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof, mmr_root: T::Hash, relay_proof: ()) -> DispatchResult {
+			T::RelayerOrigin::ensure_origin(origin)?;
+
+			// TODO:
+			// 1.) Verify MmrProof by calling verify with MmrRoot and MmrProof
+			// 2.) Verify relay proof passes (para_block which carries these messages is included)
+			// 3.) if passes check then start process of decoding the XCMP blob into its XCM components
+			// 4.) Process XCM messages
+
+			Ok(())
+		}
 	}
 
 }
@@ -75,11 +100,12 @@ impl<T: Config<I>, I: 'static> LeafDataProvider for Pallet<T, I> {
 	type LeafData = MmrLeaf<BlockNumberFor<T>, T::Hash, XcmpMessages<T, I>>;
 
 	fn leaf_data() -> Self::LeafData {
+		let raw_messages = T::XcmpDataProvider::get_xcmp_messages(ParentNumberAndHash::<T>::leaf_data().1, T::ParaIdentifier::get());
+		Self::deposit_event(Event::XcmpMessageSent{ msg_hash: <T as frame_system::Config>::Hashing::hash_of(&raw_messages), block_num: ParentNumberAndHash::<T>::leaf_data().0});
 		Self::LeafData {
 			version: T::LeafVersion::get(),
-			xcmp_msgs: T::XcmpDataProvider::get_xcmp_messages(ParentNumberAndHash::<T>::leaf_data().1, T::ParaIdentifier::get()), // TODO: This needs to be the current XCMP messages in the current block?
+			xcmp_msgs: raw_messages,
 			parent_number_and_hash: ParentNumberAndHash::<T>::leaf_data(),
 		}
 	}
 }
-

@@ -22,6 +22,7 @@ frame-system = { workspace = true, default-features = false }
 pallet-mmr = { workspace = true, default-features = false }
 sp-consensus-beefy = { workspace = true, default-features = false }
 sp-core = { workspace = true, default-features = false }
+sp-runtime = { workspace = true, default-features = false }
 
 # Cumulus
 cumulus-primitives-core = { workspace = true, default-features = false }
@@ -59,6 +60,7 @@ std = [
 	"sp-io/std",
 	"sp-runtime/std",
     "sp-consensus-beefy/std",
+	"sp-runtime/std",
 	"xcm/std",
 	"xcm-executor/std",
 	"xcm-builder/std",

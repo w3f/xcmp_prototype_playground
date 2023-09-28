@@ -15,7 +15,7 @@ resolver = "2"
 color-print = "0.3.4"
 clap = "4.3.0"
 hex-literal = "0.4.1"
-jsonrpsee = "0.16.2"
+jsonrpsee = { version = "0.16.2", features = ["http-client"] }
 log = { version = "0.4", default-features = false }
 parity-scale-codec = { version = "3.0.0", default-features = false, features = ["derive"] }
 parity-util-mem = "0.12.0"
@@ -87,6 +87,8 @@ sp-timestamp = { default_features = false, git = "https://github.com/coax1d/polk
 sp-transaction-pool = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
 sp-version = { default-features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
 
+subxt = { git = 'https://github.com/paritytech/subxt', branch = "master" }
+
 # Node Deps
 frame-benchmarking-cli = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
 pallet-transaction-payment-rpc = { default-features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
@@ -117,6 +119,9 @@ pallet-transaction-payment = { git = "https://github.com/coax1d/polkadot-sdk", d
 pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
 sp-consensus-beefy = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
 sp-offchain = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+sp-mmr-primitives = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+mmr-rpc = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+mmr-gadget = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
 
 # Polkadot
 polkadot-cli = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }

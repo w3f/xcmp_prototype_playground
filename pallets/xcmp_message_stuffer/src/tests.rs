@@ -4,17 +4,24 @@ use frame_support::{assert_noop, assert_ok};
 use xcm::{latest::prelude::*, VersionedXcm, WrapVersion, MAX_XCM_DECODE_DEPTH};
 use xcm_executor::traits::ConvertOrigin;
 use xcm_builder::{CurrencyAdapter, IsConcrete, ParentIsPreset, NativeAsset, FixedWeightBounds};
+use sp_core::offchain::{testing::TestOffchainExt, OffchainDbExt, OffchainWorkerExt};
 
 use sp_consensus_beefy::{
 	mmr::MmrLeafVersion,
 };
 
-use sp_runtime::codec::{Encode, Decode};
+use parity_scale_codec::{Encode, Decode};
 use frame_support::traits::{OnInitialize, OnFinalize};
 
 use sp_core::Hasher;
 
 use cumulus_pallet_xcmp_queue::OutboundXcmpMessages;
+
+fn register_offchain_ext(ext: &mut sp_io::TestExternalities) {
+	let (offchain, _offchain_state) = TestOffchainExt::with_offchain_db(ext.offchain_db());
+	ext.register_extension(OffchainDbExt::new(offchain.clone()));
+	ext.register_extension(OffchainWorkerExt::new(offchain));
+}
 
 fn read_mmr_leaf(ext: &mut TestExternalities, key: Vec<u8>) -> MmrLeaf {
 	type Node = pallet_mmr::primitives::DataOrHash<Keccak256, MmrLeaf>;
@@ -41,6 +48,23 @@ fn init_block(block: u64) {
 	MsgStufferB::on_initialize(block);
 }
 
+fn new_block() -> Weight {
+	let number = frame_system::Pallet::<Test>::block_number() + 1;
+	let hash = H256::repeat_byte(number as u8);
+
+	frame_system::Pallet::<Test>::reset_events();
+	frame_system::Pallet::<Test>::initialize(&number, &hash, &Default::default());
+	MmrParaA::on_initialize(number);
+	MmrParaB::on_initialize(number)
+}
+
+fn add_blocks(blocks: usize) {
+	// given
+	for _ in 0..blocks {
+		new_block();
+	}
+}
+
 #[test]
 fn verify_messages_stuffing_default_works() {
 	fn node_offchain_key_a(pos: usize, parent_hash: H256) -> Vec<u8> {
@@ -64,7 +88,7 @@ fn verify_messages_stuffing_default_works() {
 		MmrLeaf {
 			version: MmrLeafVersion::new(2, 8),
 			parent_number_and_hash: (0_u64, H256::repeat_byte(0x45)),
-			xcmp_msgs: <BlakeTwo256 as Hasher>::hash(&Vec::new())
+			xcmp_msgs: Vec::new(),
 		}
 	);
 
@@ -79,7 +103,7 @@ fn verify_messages_stuffing_default_works() {
 		MmrLeaf {
 			version: MmrLeafVersion::new(2, 8),
 			parent_number_and_hash: (1_u64, H256::repeat_byte(0x45)),
-			xcmp_msgs: <BlakeTwo256 as Hasher>::hash(&Vec::new())
+			xcmp_msgs: Vec::new(),
 		}
 	);
 
@@ -90,7 +114,7 @@ fn verify_messages_stuffing_default_works() {
 		MmrLeaf {
 			version: MmrLeafVersion::new(2, 8),
 			parent_number_and_hash: (0_u64, H256::repeat_byte(0x45)),
-			xcmp_msgs: <BlakeTwo256 as Hasher>::hash(&Vec::new())
+			xcmp_msgs: Vec::new(),
 		}
 	);
 
@@ -105,7 +129,7 @@ fn verify_messages_stuffing_default_works() {
 		MmrLeaf {
 			version: MmrLeafVersion::new(2, 8),
 			parent_number_and_hash: (1_u64, H256::repeat_byte(0x45)),
-			xcmp_msgs: <BlakeTwo256 as Hasher>::hash(&Vec::new())
+			xcmp_msgs: Vec::new(),
 		}
 	);
 }
@@ -155,7 +179,7 @@ fn verify_messages_stuffing_xcmp_messages_works() {
 		MmrLeaf {
 			version: MmrLeafVersion::new(2, 8),
 			parent_number_and_hash: (0_u64, H256::repeat_byte(0x45)),
-			xcmp_msgs: <BlakeTwo256 as Hasher>::hash(&Vec::new())
+			xcmp_msgs: Vec::new()
 		}
 	);
 
@@ -178,7 +202,7 @@ fn verify_messages_stuffing_xcmp_messages_works() {
 		MmrLeaf {
 			version: MmrLeafVersion::new(2, 8),
 			parent_number_and_hash: (1_u64, H256::repeat_byte(0x45)),
-			xcmp_msgs: <BlakeTwo256 as Hasher>::hash(&xcmp_aggregate)
+			xcmp_msgs: xcmp_aggregate,
 		}
 	);
 
@@ -189,7 +213,7 @@ fn verify_messages_stuffing_xcmp_messages_works() {
 		MmrLeaf {
 			version: MmrLeafVersion::new(2, 8),
 			parent_number_and_hash: (1_u64, H256::repeat_byte(0x45)),
-			xcmp_msgs: <BlakeTwo256 as Hasher>::hash(&single_xcmp)
+			xcmp_msgs: single_xcmp,
 		}
 	);
 
