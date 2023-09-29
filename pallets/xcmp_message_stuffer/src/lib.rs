@@ -18,6 +18,8 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+const LOG_TARGET: &str = "runtime::xmp_message_stuffer";
+
 pub trait XcmpMessageProvider<Hash> {
 	type XcmpMessages: Encode + Decode + scale_info::prelude::fmt::Debug + PartialEq + Clone;
 
@@ -66,8 +68,13 @@ pub mod pallet {
 
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn verify_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof, mmr_root: T::Hash, relay_proof: ()) -> DispatchResult {
+		pub fn submit_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof, mmr_root: T::Hash, relay_proof: ()) -> DispatchResult {
 			T::RelayerOrigin::ensure_origin(origin)?;
+
+			log::info!(
+				target: LOG_TARGET,
+				"Called submit xcmp proof",
+			);
 
 			// TODO:
 			// 1.) Verify MmrProof by calling verify with MmrRoot and MmrProof
