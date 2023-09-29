@@ -33,7 +33,7 @@ Q:
 #### ParaA:
 
 - Sends an XCM message as usual.
-- Adds a commitment of the message (plus an index?) into its message MMR.
+- Adds a commitment of the message into its message MMR.
 - The message MMR root (or all peaks?) gets stored inside the XCMP dedicated trie.
 
 #### Relayer (Having full nodes of `ParaA`, `ParaB`, Relaychain):
@@ -59,12 +59,6 @@ pub struct RelayerProof {
     mmr_root: Hash,
     message_proof: MmrProof,
     relay_proof: RelayProof, 
-}
-
-// Note: Not actual type just for explanation purposes
-pub struct MmrProof {
-    mmr_peaks: Vec<MmrNode>,
-    mmr_nodes: Vec<MmrNode>,
 }
 
 // Note: Not actual type just for explanation purposes
