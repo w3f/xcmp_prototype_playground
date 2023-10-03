@@ -111,7 +111,19 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 		while let Some(block) = blocks_sub.next().await {
 			let block = block?;
 
-			let hash_tx = client.subxt_client.tx().sign_and_submit_then_watch_default(&tx, &signer).await?.extrinsic_hash();
+			let tx_progress = client.subxt_client.tx().sign_and_submit_then_watch_default(&tx, &signer).await?;
+			let hash_tx = tx_progress.extrinsic_hash();
+			match tx_progress.wait_for_in_block().await {
+				Ok(tx_in_block) => {
+					match tx_in_block.wait_for_success().await {
+						Ok(events) => { log::info!("Got the tx in a block and it succeeded! {:?}", events); },
+						Err(e) => { log::info!("Was not successful extrinsic ERROR:: {:?}", e); }
+					}
+				},
+				Err(e) => {
+					log::info!("Tx didnt get in a block error {:?}", e);
+				}
+			}
 			log::info!("Hash of xcmp_proof_submission: {:?}", hash_tx);
 		}
 

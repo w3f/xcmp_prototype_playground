@@ -69,7 +69,7 @@ pub mod pallet {
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn submit_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof, mmr_root: T::Hash, relay_proof: ()) -> DispatchResult {
-			T::RelayerOrigin::ensure_origin(origin)?;
+			ensure_signed(origin)?;
 
 			log::info!(
 				target: LOG_TARGET,
