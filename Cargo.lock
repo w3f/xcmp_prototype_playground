@@ -13110,7 +13110,7 @@ checksum = "734676eb262c623cec13c3155096e08d1f8f29adce39ba17948b18dad1e54142"
 [[package]]
 name = "subxt"
 version = "0.32.0"
-source = "git+https://github.com/paritytech/subxt?branch=master#36199a138b48d9c53148624498e5111086d9328e"
+source = "git+https://github.com/paritytech/subxt?branch=master#e91d0c7b37da5deee10892712b55e7a65833f5f9"
 dependencies = [
  "async-trait",
  "base58",
@@ -13142,7 +13142,7 @@ dependencies = [
 [[package]]
 name = "subxt-codegen"
 version = "0.32.0"
-source = "git+https://github.com/paritytech/subxt?branch=master#36199a138b48d9c53148624498e5111086d9328e"
+source = "git+https://github.com/paritytech/subxt?branch=master#e91d0c7b37da5deee10892712b55e7a65833f5f9"
 dependencies = [
  "frame-metadata 16.0.0",
  "heck",
@@ -13161,7 +13161,7 @@ dependencies = [
 [[package]]
 name = "subxt-lightclient"
 version = "0.32.0"
-source = "git+https://github.com/paritytech/subxt?branch=master#36199a138b48d9c53148624498e5111086d9328e"
+source = "git+https://github.com/paritytech/subxt?branch=master#e91d0c7b37da5deee10892712b55e7a65833f5f9"
 dependencies = [
  "futures",
  "futures-util",
@@ -13177,7 +13177,7 @@ dependencies = [
 [[package]]
 name = "subxt-macro"
 version = "0.32.0"
-source = "git+https://github.com/paritytech/subxt?branch=master#36199a138b48d9c53148624498e5111086d9328e"
+source = "git+https://github.com/paritytech/subxt?branch=master#e91d0c7b37da5deee10892712b55e7a65833f5f9"
 dependencies = [
  "darling 0.20.3",
  "proc-macro-error",
@@ -13188,7 +13188,7 @@ dependencies = [
 [[package]]
 name = "subxt-metadata"
 version = "0.32.0"
-source = "git+https://github.com/paritytech/subxt?branch=master#36199a138b48d9c53148624498e5111086d9328e"
+source = "git+https://github.com/paritytech/subxt?branch=master#e91d0c7b37da5deee10892712b55e7a65833f5f9"
 dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
@@ -13893,7 +13893,7 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "digest 0.10.7",
- "rand 0.8.5",
+ "rand 0.7.3",
  "static_assertions",
 ]
 
