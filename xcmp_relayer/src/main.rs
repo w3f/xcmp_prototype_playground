@@ -20,7 +20,10 @@ use subxt::{OnlineClient, PolkadotConfig, backend::rpc::{RpcClient, RpcClientT}}
 
 use mmr_rpc::LeavesProof;
 
-// use subxt_signer::sr25519::dev;
+use subxt_signer::sr25519::dev;
+
+#[subxt::subxt(runtime_metadata_url = "ws://localhost:54887")]
+pub mod polkadot { }
 
 /// The default endpoints for each
 const DEFAULT_ENDPOINT_PARA_SENDER: &str = "ws://localhost:54888";
@@ -90,6 +93,7 @@ async fn main() -> anyhow::Result<()> {
 }
 
 async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
+	let client = client.clone();
 	let root = generate_mmr_root(&client).await?;
 	let proof = generate_mmr_proof(&client).await?;
 	let params = rpc_params![root, proof];
@@ -97,6 +101,34 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 	let request: Option<bool> = client.rpc_client.request("mmr_verifyProofStateless", params).await?;
 	let verification = request.ok_or(RelayerError::Default)?;
 	log::info!("Was proof verified? Answer:: {}", verification);
+
+	let signer = dev::alice();
+	let tx = crate::polkadot::tx().msg_stuffer_para_a().submit_xcmp_proof((), H256::zero(), ());
+
+	task::spawn(async move {
+		let mut blocks_sub = client.subxt_client.blocks().subscribe_best().await?;
+
+		while let Some(block) = blocks_sub.next().await {
+			let block = block?;
+
+			let tx_progress = client.subxt_client.tx().sign_and_submit_then_watch_default(&tx, &signer).await?;
+			let hash_tx = tx_progress.extrinsic_hash();
+			match tx_progress.wait_for_in_block().await {
+				Ok(tx_in_block) => {
+					match tx_in_block.wait_for_success().await {
+						Ok(events) => { log::info!("Got the tx in a block and it succeeded! {:?}", events); },
+						Err(e) => { log::info!("Was not successful extrinsic ERROR:: {:?}", e); }
+					}
+				},
+				Err(e) => {
+					log::info!("Tx didnt get in a block error {:?}", e);
+				}
+			}
+			log::info!("Hash of xcmp_proof_submission: {:?}", hash_tx);
+		}
+
+		Ok::<(), anyhow::Error>(())
+	});
 	Ok(())
 }
 

@@ -88,6 +88,7 @@ sp-transaction-pool = { default_features = false, git = "https://github.com/coax
 sp-version = { default-features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
 
 subxt = { git = 'https://github.com/paritytech/subxt', branch = "master" }
+subxt-signer = { git = 'https://github.com/paritytech/subxt', branch = "master", features = ["subxt"] }
 
 # Node Deps
 frame-benchmarking-cli = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }

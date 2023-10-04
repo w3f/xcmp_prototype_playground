@@ -474,7 +474,7 @@ impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 	fn get_xcmp_messages(block_hash: Hash, para_id: ParaId) -> Self::XcmpMessages {
 		use cumulus_pallet_xcmp_queue::OutboundXcmpMessages;
 		// TODO: Temporarily we aggregate all the fragments destined to a particular
-		// Parachain per block and hash them and stick that into the mmr otherwise need a way
+		// Parachain per block and stick that into the mmr otherwise need a way
 		// of adding multiple MMR leaves per block to the MMR (Which for now means editing the mmr impl?)
 		let mut msg_buffer = Vec::new();
 		let mut counter = 0u16;
@@ -517,7 +517,7 @@ impl pallet_xcmp_message_stuffer::Config<ParaAChannel> for Runtime {
 
 type ParaAMmr = pallet_mmr::Instance1;
 impl pallet_mmr::Config<ParaAMmr> for Runtime {
-	const INDEXING_PREFIX: &'static [u8] = b"para_a_mmr";
+	const INDEXING_PREFIX: &'static [u8] = sp_mmr_primitives::INDEXING_PREFIX;
 	type OnNewRoot = pallet_xcmp_message_stuffer::OnNewRootSatisfier<Runtime>;
 	type Hashing = Keccak256;
 	type LeafData = pallet_xcmp_message_stuffer::Pallet<Runtime, ParaAChannel>;
