@@ -25,7 +25,7 @@ serde = "1.0"
 # Procedural macro dependencies
 proc-macro2 = "1.0.67"
 quote = "1.0.23"
-syn = "2.0.15"
+syn = "2.0.38"
 
 # Core-only dependencies
 array-bytes = "6.0.0"
