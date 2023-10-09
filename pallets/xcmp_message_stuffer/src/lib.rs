@@ -107,8 +107,8 @@ impl<T> pallet_mmr::primitives::OnNewRoot<sp_consensus_beefy::MmrRootHash> for O
 
 #[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
 pub struct MmrLeaf<BlockNumber, Hash, XcmpMessages> {
-	version: MmrLeafVersion,
 	xcmp_msgs: XcmpMessages,
+	version: MmrLeafVersion,
 	parent_number_and_hash: (BlockNumber, Hash),
 }
 
@@ -119,8 +119,8 @@ impl<T: Config<I>, I: 'static> LeafDataProvider for Pallet<T, I> {
 		let raw_messages = T::XcmpDataProvider::get_xcmp_messages(ParentNumberAndHash::<T>::leaf_data().1, T::ParaIdentifier::get());
 		Self::deposit_event(Event::XcmpMessageSent{ msg_hash: <T as frame_system::Config>::Hashing::hash_of(&raw_messages), block_num: ParentNumberAndHash::<T>::leaf_data().0});
 		Self::LeafData {
-			version: T::LeafVersion::get(),
 			xcmp_msgs: raw_messages,
+			version: T::LeafVersion::get(),
 			parent_number_and_hash: ParentNumberAndHash::<T>::leaf_data(),
 		}
 	}

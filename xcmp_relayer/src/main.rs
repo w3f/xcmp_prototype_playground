@@ -99,12 +99,17 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 	let root = generate_mmr_root(&client).await?;
 	let proof = generate_mmr_proof(&client).await?;
 
+	log::info!("Before decoding the leaves {:?}", proof.leaves.0);
+
 	let leaves = Decode::decode(&mut &proof.leaves.0[..])
 			.map_err(|e| anyhow::Error::new(e))?;
+
+	log::info!("Decoded leaves {:?}", leaves);
 
 	let decoded_proof = Decode::decode(&mut &proof.proof.0[..])
 			.map_err(|e| anyhow::Error::new(e))?;
 
+	log::info!("Decoded proof {:?}", decoded_proof);
 
 	let params = rpc_params![root, proof];
 
@@ -235,7 +240,7 @@ async fn do_mean(vec: &[u64]) -> anyhow::Result<u64> {
 async fn generate_mmr_proof(client: &MultiClient) -> anyhow::Result<LeavesProof<H256>> {
 	let block = client.subxt_client.blocks().at_latest().await?;
 
-	let params = rpc_params![vec![1,2,3,4], Option::<BlockNumber>::None, Option::<Hash>::None, 0u64];
+	let params = rpc_params![vec![1], Option::<BlockNumber>::None, Option::<Hash>::None, 0u64];
 
 	let request: Option<LeavesProof<H256>> = client.rpc_client.request("mmr_generateProof", params).await?;
 	let proof = request.ok_or(RelayerError::Default)?;
