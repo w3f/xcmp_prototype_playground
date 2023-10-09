@@ -30,7 +30,6 @@ pub trait XcmpMessageProvider<Hash> {
 }
 
 type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
-// TODO: Need the MmrProof to beable to seperate each leaf such that we can decode each XCMP message aggregate
 type MmrProof<T> = Proof<<T as frame_system::Config>::Hash>;
 type LeafOf<T, I> = <crate::Pallet<T, I> as LeafDataProvider>::LeafData;
 
@@ -38,7 +37,6 @@ type LeafOf<T, I> = <crate::Pallet<T, I> as LeafDataProvider>::LeafData;
 pub mod pallet {
 	use super::*;
 
-	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
 	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_mmr::Config<I> {
 		type ParaIdentifier: Get<ParaId>;
@@ -60,7 +58,6 @@ pub mod pallet {
 		},
 	}
 
-	// Errors inform users that something went wrong.
 	#[pallet::error]
 	pub enum Error<T, I = ()> {
 		XcmpProofNotValid,
