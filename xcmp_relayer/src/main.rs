@@ -95,6 +95,7 @@ async fn main() -> anyhow::Result<()> {
 
 async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 	let client = client.clone();
+	let channel_id = 0u64;
 	let root = generate_mmr_root(&client).await?;
 	let proof = generate_mmr_proof(&client).await?;
 
@@ -112,7 +113,7 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 	log::info!("Was proof verified? Answer:: {}", verification);
 
 	let signer = dev::alice();
-	let tx = crate::polkadot::tx().msg_stuffer_para_a().submit_xcmp_proof(decoded_proof, root, leaves);
+	let tx = crate::polkadot::tx().msg_stuffer_para_a().submit_xcmp_proof(decoded_proof, leaves, channel_id);
 
 	task::spawn(async move {
 		let mut blocks_sub = client.subxt_client.blocks().subscribe_best().await?;
