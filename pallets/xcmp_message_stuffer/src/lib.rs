@@ -32,6 +32,7 @@ pub trait XcmpMessageProvider<Hash> {
 type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
 type MmrProof<T> = Proof<<T as frame_system::Config>::Hash>;
 type LeafOf<T, I> = <crate::Pallet<T, I> as LeafDataProvider>::LeafData;
+type ChannelId = u64;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -48,6 +49,11 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
+
+	/// These are the MMR roots for each open XCMP channel as updated by the Relaychain
+	#[pallet::storage]
+	#[pallet::getter(fn xcmp_channel_roots)]
+	pub type XcmpChannelRoots<T: Config<I>, I: 'static = ()> = StorageMap<_, Identity, ChannelId, T::Hash, OptionQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -67,9 +73,11 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config<I>, I: 'static> Pallet<T, I> {
 
+		// TODO: Retrieve latest valid MmrChannelRoots from Relaychain (Perhaps this is done in on_initialize)
+
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn submit_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof<T>, leaves: Vec<LeafOf<T, I>>, mmr_root: T::Hash) -> DispatchResult {
+		pub fn submit_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof<T>, leaves: Vec<LeafOf<T, I>>, channel_id: u64) -> DispatchResult {
 			ensure_signed(origin)?;
 
 			log::info!(
@@ -78,8 +86,8 @@ pub mod pallet {
 			);
 
 			// TODO:
-			// 1.) Verify MmrProof by calling verify with MmrRoot and MmrProof
-			// 2.) Verify relay proof passes (para_block which carries these messages is included)
+			// 1.) Get latest XcmpChannelRoot using 'channel_id'
+			// 2.) Verify MmrProof by calling verify with MmrChannelRoot and MmrProof
 			// 3.) if passes check then start process of decoding the XCMP blob into its XCM components
 			// 4.) Process XCM messages
 
