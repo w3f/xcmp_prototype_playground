@@ -9,6 +9,9 @@ use frame_system::pallet_prelude::*;
 use cumulus_primitives_core::ParaId;
 use sp_runtime::traits::{Hash as HashT};
 
+use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf};
+use scale_info::prelude::vec::Vec;
+
 #[cfg(test)]
 mod mock;
 
@@ -21,14 +24,15 @@ mod benchmarking;
 const LOG_TARGET: &str = "runtime::xmp_message_stuffer";
 
 pub trait XcmpMessageProvider<Hash> {
-	type XcmpMessages: Encode + Decode + scale_info::prelude::fmt::Debug + PartialEq + Clone;
+	type XcmpMessages: Encode + Decode + scale_info::prelude::fmt::Debug + PartialEq + Clone + TypeInfo;
 
 	fn get_xcmp_messages(block_hash: Hash, para_id: ParaId) -> Self::XcmpMessages;
 }
 
 type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
 // TODO: Need the MmrProof to beable to seperate each leaf such that we can decode each XCMP message aggregate
-type MmrProof = ();
+type MmrProof<T> = Proof<<T as frame_system::Config>::Hash>;
+type LeafOf<T, I> = <crate::Pallet<T, I> as LeafDataProvider>::LeafData;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -68,7 +72,7 @@ pub mod pallet {
 
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn submit_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof, mmr_root: T::Hash, relay_proof: ()) -> DispatchResult {
+		pub fn submit_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof<T>, leaves: Vec<LeafOf<T, I>>, mmr_root: T::Hash) -> DispatchResult {
 			ensure_signed(origin)?;
 
 			log::info!(

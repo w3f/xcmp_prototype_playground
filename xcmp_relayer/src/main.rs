@@ -19,6 +19,7 @@ use futures::StreamExt;
 use subxt::{OnlineClient, PolkadotConfig, backend::rpc::{RpcClient, RpcClientT}};
 
 use mmr_rpc::LeavesProof;
+use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf};
 
 use subxt_signer::sr25519::dev;
 
@@ -96,6 +97,14 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 	let client = client.clone();
 	let root = generate_mmr_root(&client).await?;
 	let proof = generate_mmr_proof(&client).await?;
+
+	let leaves = Decode::decode(&mut &proof.leaves.0[..])
+			.map_err(|e| anyhow::Error::new(e))?;
+
+	let decoded_proof = Decode::decode(&mut &proof.proof.0[..])
+			.map_err(|e| anyhow::Error::new(e))?;
+
+
 	let params = rpc_params![root, proof];
 
 	let request: Option<bool> = client.rpc_client.request("mmr_verifyProofStateless", params).await?;
@@ -103,7 +112,7 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 	log::info!("Was proof verified? Answer:: {}", verification);
 
 	let signer = dev::alice();
-	let tx = crate::polkadot::tx().msg_stuffer_para_a().submit_xcmp_proof((), H256::zero(), ());
+	let tx = crate::polkadot::tx().msg_stuffer_para_a().submit_xcmp_proof(decoded_proof, root, leaves);
 
 	task::spawn(async move {
 		let mut blocks_sub = client.subxt_client.blocks().subscribe_best().await?;
@@ -197,6 +206,7 @@ async fn log_all_mmr_proofs(client: &MultiClient) -> anyhow::Result<()> {
 			let params = rpc_params![mmr_blocks_to_query.clone(), Option::<BlockNumber>::None, Option::<Hash>::None, para_id];
 			let request: Option<LeavesProof<H256>> = client.rpc_client.request("mmr_generateProof", params).await?;
 			let proof = request.ok_or(RelayerError::Default)?;
+
 			mmr_blocks_to_query.push(mmr_blocks_benchmark_counter);
 			mmr_blocks_benchmark_counter += 1;
 
