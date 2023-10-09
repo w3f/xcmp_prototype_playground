@@ -23,7 +23,7 @@ scale-info = { version = "2.2.0", default-features = false, features = ["derive"
 serde = "1.0"
 
 # Procedural macro dependencies
-proc-macro2 = "1.0.67"
+proc-macro2 = "1.0.69"
 quote = "1.0.23"
 syn = "2.0.15"
 
