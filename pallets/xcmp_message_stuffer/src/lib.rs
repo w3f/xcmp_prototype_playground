@@ -1,15 +1,16 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
-use pallet_mmr::{LeafDataProvider, ParentNumberAndHash};
+use pallet_mmr::{LeafDataProvider, ParentNumberAndHash, verify_leaves_proof};
 use sp_consensus_beefy::mmr::MmrLeafVersion;
 
 use frame_support::{dispatch::{DispatchResult}, pallet_prelude::*,};
 use frame_system::pallet_prelude::*;
 use cumulus_primitives_core::ParaId;
-use sp_runtime::traits::{Hash as HashT};
+use sp_runtime::traits::{Hash as HashT, Keccak256};
+use sp_core::H256;
 
-use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf};
+use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf, DataOrHash};
 use scale_info::prelude::vec::Vec;
 
 #[cfg(test)]
@@ -30,7 +31,8 @@ pub trait XcmpMessageProvider<Hash> {
 }
 
 type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
-type MmrProof<T> = Proof<<T as frame_system::Config>::Hash>;
+// type MmrProof<T> = Proof<<T as frame_system::Config>::Hash>;
+type MmrProof = Proof<H256>;
 type LeafOf<T, I> = <crate::Pallet<T, I> as LeafDataProvider>::LeafData;
 type ChannelId = u64;
 
@@ -53,7 +55,7 @@ pub mod pallet {
 	/// These are the MMR roots for each open XCMP channel as updated by the Relaychain
 	#[pallet::storage]
 	#[pallet::getter(fn xcmp_channel_roots)]
-	pub type XcmpChannelRoots<T: Config<I>, I: 'static = ()> = StorageMap<_, Identity, ChannelId, T::Hash, OptionQuery>;
+	pub type XcmpChannelRoots<T: Config<I>, I: 'static = ()> = StorageMap<_, Identity, ChannelId, H256, OptionQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -62,12 +64,18 @@ pub mod pallet {
 			msg_hash: T::Hash,
 			block_num: BlockNumberFor<T>,
 		},
+		XcmpMessagesAccepted {
+			mmr_channel_root: H256,
+			channel_id: ChannelId,
+		},
 	}
 
 	#[pallet::error]
 	pub enum Error<T, I = ()> {
 		XcmpProofNotValid,
 		XcmpProofAccepted,
+		XcmpProofLeavesNotValid,
+		XcmpNoChannelRootForChannelId,
 	}
 
 	#[pallet::call]
@@ -77,7 +85,7 @@ pub mod pallet {
 
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn submit_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof<T>, leaves: Vec<LeafOf<T, I>>, channel_id: u64) -> DispatchResult {
+		pub fn submit_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof, leaves: Vec<EncodableOpaqueLeaf>, channel_id: u64) -> DispatchResult {
 			ensure_signed(origin)?;
 
 			log::info!(
@@ -85,12 +93,56 @@ pub mod pallet {
 				"Called submit xcmp proof",
 			);
 
+			let nodes: Vec<_> = leaves
+				.clone()
+				.into_iter()
+				.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
+				.collect();
+
+			log::info!(
+				target: LOG_TARGET,
+				"Leaves are {:?}",
+				nodes
+			);
+
+			let root = Self::xcmp_channel_roots(channel_id).ok_or(Error::<T, I>::XcmpNoChannelRootForChannelId)?;
+
+			log::info!(
+				target: LOG_TARGET,
+				"obtained xcmp channel root {:?}",
+				root
+			);
+
+			verify_leaves_proof(root, nodes, mmr_proof).map_err(|_| Error::<T, I>::XcmpProofNotValid)?;
+
+			log::info!(
+				target: LOG_TARGET,
+				"Verified XCMP Channel Mmr proof",
+			);
+
+			Self::deposit_event(Event::XcmpMessagesAccepted { mmr_channel_root: root, channel_id: channel_id } );
+
 			// TODO:
 			// 1.) Get latest XcmpChannelRoot using 'channel_id'
 			// 2.) Verify MmrProof by calling verify with MmrChannelRoot and MmrProof
 			// 3.) if passes check then start process of decoding the XCMP blob into its XCM components
 			// 4.) Process XCM messages
 
+			Ok(())
+		}
+
+		/// TODO: This is just for testing relayer for now. The root should be updated by checking
+		/// the relaychain updated XCMPTrie
+		#[pallet::call_index(1)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn update_root(origin: OriginFor<T>, root: H256, channel_id: u64) -> DispatchResult {
+			ensure_signed(origin)?;
+			XcmpChannelRoots::<T, I>::insert(&channel_id, root);
+			log::info!(
+				target: LOG_TARGET,
+				"Updated root for channel_id: {:?}, root: {:?}",
+				channel_id, root
+			);
 			Ok(())
 		}
 	}
