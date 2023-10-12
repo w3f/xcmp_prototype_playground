@@ -476,7 +476,7 @@ impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 		// TODO: Temporarily we aggregate all the fragments destined to a particular
 		// Parachain per block and stick that into the mmr otherwise need a way
 		// of adding multiple MMR leaves per block to the MMR (Which for now means editing the mmr impl?)
-		let mut msg_buffer = Vec::new();
+		let mut msg_buffer = Vec::from([1, 2, 3]);
 		let mut counter = 0u16;
 		while let Ok(buffer) = OutboundXcmpMessages::<Runtime>::try_get(para_id, counter) {
 			msg_buffer.extend_from_slice(&buffer[..]);
