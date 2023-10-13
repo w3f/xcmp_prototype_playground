@@ -24,7 +24,10 @@ Q:
 
 ### XCMPChannel Trie Contents
 
-- MMRab root, MMRac root, etc.: Each XCMP channel's MMR root.
+- MMRab root, MMRac root, etc.: Each parachains XCMP channel's MMR root.
+
+### XCMPTrie
+- This contains every Parachain's XCMPChannelTrieRoot
 
 ### Flow of Messages
 
