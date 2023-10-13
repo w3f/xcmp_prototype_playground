@@ -19,52 +19,45 @@ In a scenario where `ParaA` wants to send a message to `ParaB` (`ParaA -> ParaB`
 ParaA MSGab -> Message MMR -> MMR root -> XCMP trie -> XCMP trie root -> Parachain State trie -> Parachain state root -> Relay state trie -> Relay Root
 
 Q:
-    Does each MMR peak get added to the XCMP trie? Or just each MMR Root(after bagging peaks). What is stored in the XCMP trie?
+    Does each MMR peak get added to the XCMP trie? Or just each MMR Root(after bagging peaks). What else can be stored in the XCMP trie?
 
 
-### XCMP Trie Contents
+### XCMPChannel Trie Contents
 
-- MMRab root, MMRbc root, etc.: Each XCMP channel's MMR root.
-- Polkadot XCMP trie root
-- KSM XCMP trie root
+- MMRab root, MMRac root, etc.: Each XCMP channel's MMR root.
 
 ### Flow of Messages
 
-#### ParaA:
+#### ParaA(Sender):
 
 - Sends an XCM message as usual.
-- Adds a commitment of the message into its message MMR.
+- Adds the message as a leaf into one of its message XcmpChannelMmrs.
 - The message MMR root (or all peaks?) gets stored inside the XCMP dedicated trie.
 
 #### Relayer (Having full nodes of `ParaA`, `ParaB`, Relaychain):
 
 1. **Detection of Destination**:
-   - `ParaA` module detects the message is destined for `ParaB`.
-   - **Query**: How? Possibly by reading XCM message MultiLocations?
+   - `Relayer` module detects a message from `ParaA` to `ParaB` is sent.
 
 2. **Proof Construction**:
-   - Constructs the proof as `ParaA proof` = (message + mmr root + membership proof (via MMR nodes and peaks)).
-   - Relay proof = (membership proof (ParaA message + MMR peak)).
-   
-   - **Open Query**: How does the relayer detect and/or receive the messages?
+   - Constructs the proof as `ParaA proof` = (messages + mmr membership proof).
 
 3. **Proof Submission**:
-   - Submits proof to `ParaB`'s XCMP extrinsic labeled `verify_xcmp_message(RelayerProof)`.
+   - Submits proof to `ParaB`'s XCMP extrinsic labeled `submit_xcmp_proof(leaves, channel_id)`.
+  
+#### ParaB(Receiver):
+  
+1. **Proof Verification**:
+   -  Because the receiver can track the XCMPChannelTrieRoot changes on the Relaychain the verifier stores the latest XcmpChannelMmr roots in its state
+     	Because a parachain can have multiple Channels it stores the particular XcmpChannelMmrRoots indexed by a `channel_id`
+   -  When the Relayer submits a proof of a particular of some particular messages the receiving chain can check those messages(leaves of the mmr) against its current
+     	XcmpChannelMmrRoot for the particular `channel_id`
 
 ```rust
 
-// Note: Not actual type just for explanation purposes
 pub struct RelayerProof {
-    message: XcmpMessage,
-    mmr_root: Hash,
-    message_proof: MmrProof,
-    relay_proof: RelayProof, 
-}
-
-// Note: Not actual type just for explanation purposes
-pub struct RelayProof {
-    relay_root: Hash,
-    relay_nodes: Vec<RelayNode>,
+    message_proof: Proof<H256>,
+    channel_id: u64,
 }
 
 ```
