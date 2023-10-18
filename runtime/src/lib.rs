@@ -25,6 +25,8 @@ use sp_runtime::{
 
 use sp_consensus_beefy::mmr::MmrLeafVersion;
 
+use parity_scale_codec::Encode;
+
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -486,6 +488,25 @@ impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 		msg_buffer
 	}
 }
+
+pub trait CollectMmrRoots {
+	type MerkleRoot;
+	fn collect_roots() -> Self::MerkleRoot;
+}
+
+pub struct XcmpChannelRootCollector;
+impl CollectMmrRoots for XcmpChannelRootCollector {
+	type MerkleRoot = Hash;
+	fn collect_roots() -> Self::MerkleRoot {
+		// TODO: add this root to the ParaHeader
+		// TODO: Make this a trie root instead of a binary_merkle_tree
+		let xcmp_channel_mmr_roots = vec![MmrParaA::mmr_root_hash(), MmrParaB::mmr_root_hash()];
+		binary_merkle_tree::merkle_root::<mmr::Hashing, _>(
+			xcmp_channel_mmr_roots.into_iter().map(|root| root.encode())
+		).into()
+	}
+}
+
 
 parameter_types! {
 	/// Version of the produced MMR leaf.
