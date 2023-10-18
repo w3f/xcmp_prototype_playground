@@ -21,7 +21,7 @@ use subxt::{OnlineClient, PolkadotConfig, backend::rpc::{RpcClient, RpcClientT}}
 use mmr_rpc::LeavesProof;
 use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf};
 
-use subxt_signer::sr25519::dev;
+use subxt_signer::{sr25519::dev, ecdsa::dev::alice};
 
 #[subxt::subxt(runtime_metadata_url = "ws://localhost:54887")]
 pub mod polkadot { }
@@ -93,14 +93,15 @@ async fn main() -> anyhow::Result<()> {
 	Ok(())
 }
 
-async fn update_root(client: &MultiClient, root: H256) -> anyhow::Result<()> {
+async fn update_root(client: &MultiClient, root: H256, nonce: u64) -> anyhow::Result<()> {
 	let signer = dev::alice();
 	let channel_id = 0u64;
 	let tx = crate::polkadot::tx().msg_stuffer_para_a().update_root(root, channel_id);
 
-	let tx_progress = client.subxt_client.tx().sign_and_submit_then_watch_default(&tx, &signer).await?;
+	let submit_ext = client.subxt_client.tx().create_signed_with_nonce(&tx, &signer, nonce, Default::default())?;
+	let tx_progress = submit_ext.submit_and_watch().await?;
 	let hash_tx = tx_progress.extrinsic_hash();
-	match tx_progress.wait_for_in_block().await {
+	match tx_progress.wait_for_finalized().await {
 		Ok(tx_in_block) => {
 			match tx_in_block.wait_for_success().await {
 				Ok(events) => { log::info!("Got the tx in a block and it succeeded! {:?}", events); },
@@ -115,7 +116,7 @@ async fn update_root(client: &MultiClient, root: H256) -> anyhow::Result<()> {
 	Ok(())
 }
 
-async fn submit_proof(client: &MultiClient, proof: LeavesProof<H256>) -> anyhow::Result<()> {
+async fn submit_proof(client: &MultiClient, proof: LeavesProof<H256>, nonce: u64) -> anyhow::Result<()> {
 	let signer = dev::bob();
 	let channel_id = 0u64;
 	let leaves = Decode::decode(&mut &proof.leaves.0[..])
@@ -130,10 +131,11 @@ async fn submit_proof(client: &MultiClient, proof: LeavesProof<H256>) -> anyhow:
 
 	let tx = crate::polkadot::tx().msg_stuffer_para_a().submit_xcmp_proof(decoded_proof, leaves, channel_id);
 
-	let tx_progress = client.subxt_client.tx().sign_and_submit_then_watch_default(&tx, &signer).await?;
+	let submit_ext = client.subxt_client.tx().create_signed_with_nonce(&tx, &signer, nonce, Default::default())?;
+	let tx_progress = submit_ext.submit_and_watch().await?;
 	let hash_tx = tx_progress.extrinsic_hash();
 	log::info!("Got After submitting submit_xcmp_proof");
-	match tx_progress.wait_for_in_block().await {
+	match tx_progress.wait_for_finalized().await {
 		Ok(tx_in_block) => {
 			match tx_in_block.wait_for_success().await {
 				Ok(events) => { log::info!("Got the tx in a block and it succeeded! {:?}", events); },
@@ -161,10 +163,10 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 	let verification = request.ok_or(RelayerError::Default)?;
 	log::info!("Was proof verified? Answer:: {}", verification);
 
-	let root = generate_mmr_root(&client).await?;
-	update_root(&client, root).await?;
+	update_root(&client, root, 0).await?;
 
-	let signer = dev::bob();
+	let alice_signer = dev::alice();
+	let bob_signer = dev::bob();
 
 	task::spawn(async move {
 		let mut blocks_sub = client.subxt_client.blocks().subscribe_best().await?;
@@ -172,9 +174,30 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 		while let Some(block) = blocks_sub.next().await {
 			let block = block?;
 
+			let alice_account_nonce = client.subxt_client
+				.blocks()
+				.at(block.hash())
+				.await?
+				.account_nonce(&alice_signer.public_key().to_account_id())
+				.await?;
+
+			log::info!("Alice current account nonce: {}", alice_account_nonce);
+
+			let bob_account_nonce = client.subxt_client
+				.blocks()
+				.at(block.hash())
+				.await?
+				.account_nonce(&bob_signer.public_key().to_account_id())
+				.await?;
+
+			log::info!("Bob current account nonce: {}", bob_account_nonce);
+
+			let root = generate_mmr_root(&client).await?;
+			update_root(&client, root, alice_account_nonce).await?;
+
 			let proof = generate_mmr_proof(&client).await?;
 
-			submit_proof(&client, proof).await?;
+			submit_proof(&client, proof, bob_account_nonce).await?;
 			log::info!("Got after submitting the proof");
 		}
 		log::info!("EXITING!!!!!");
