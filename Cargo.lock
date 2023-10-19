@@ -9572,14 +9572,14 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.10.0"
+version = "1.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d119d7c7ca818f8a53c300863d4f87566aac09943aef5b355bb83969dae75d87"
+checksum = "380b951a9c5e80ddfd6136919eef32310721aa4aacd4889a8d39124b026ab343"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-automata 0.4.1",
- "regex-syntax 0.8.0",
+ "regex-automata 0.4.3",
+ "regex-syntax 0.8.2",
 ]
 
 [[package]]
@@ -9593,13 +9593,13 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.4.1"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "465c6fc0621e4abc4187a2bda0937bfd4f722c2730b29562e19689ea796c9a4b"
+checksum = "5f804c7828047e88b2d32e2d7fe5a105da8ee3264f01902f796c8e067dc2483f"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-syntax 0.8.0",
+ "regex-syntax 0.8.2",
 ]
 
 [[package]]
@@ -9610,9 +9610,9 @@ checksum = "f162c6dd7b008981e4d40210aca20b4bd0f9b60ca9271061b07f78537722f2e1"
 
 [[package]]
 name = "regex-syntax"
-version = "0.8.0"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3cbb081b9784b07cceb8824c8583f86db4814d172ab043f3c23f7dc600bf83d"
+checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 
 [[package]]
 name = "resolv-conf"
@@ -13144,7 +13144,7 @@ checksum = "734676eb262c623cec13c3155096e08d1f8f29adce39ba17948b18dad1e54142"
 [[package]]
 name = "subxt"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+source = "git+https://github.com/paritytech/subxt?branch=master#71fbfebf5ad5ced94d26516b2e716db118be8392"
 dependencies = [
  "async-trait",
  "base58",
@@ -13176,7 +13176,7 @@ dependencies = [
 [[package]]
 name = "subxt-codegen"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+source = "git+https://github.com/paritytech/subxt?branch=master#71fbfebf5ad5ced94d26516b2e716db118be8392"
 dependencies = [
  "frame-metadata 16.0.0",
  "heck",
@@ -13195,7 +13195,7 @@ dependencies = [
 [[package]]
 name = "subxt-lightclient"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+source = "git+https://github.com/paritytech/subxt?branch=master#71fbfebf5ad5ced94d26516b2e716db118be8392"
 dependencies = [
  "futures",
  "futures-util",
@@ -13211,7 +13211,7 @@ dependencies = [
 [[package]]
 name = "subxt-macro"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+source = "git+https://github.com/paritytech/subxt?branch=master#71fbfebf5ad5ced94d26516b2e716db118be8392"
 dependencies = [
  "darling 0.20.3",
  "proc-macro-error",
@@ -13222,7 +13222,7 @@ dependencies = [
 [[package]]
 name = "subxt-metadata"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+source = "git+https://github.com/paritytech/subxt?branch=master#71fbfebf5ad5ced94d26516b2e716db118be8392"
 dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
@@ -13234,7 +13234,7 @@ dependencies = [
 [[package]]
 name = "subxt-signer"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+source = "git+https://github.com/paritytech/subxt?branch=master#71fbfebf5ad5ced94d26516b2e716db118be8392"
 dependencies = [
  "bip39",
  "hex",
@@ -13695,11 +13695,10 @@ checksum = "b6bc1c9ce2b5135ac7f93c72918fc37feb872bdc6a5533a8b85eb4b86bfdae52"
 
 [[package]]
 name = "tracing"
-version = "0.1.37"
+version = "0.1.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
+checksum = "c3523ab5a71916ccf420eebdf5521fcef02141234bbc0b8a49f2fdc4544364ef"
 dependencies = [
- "cfg-if",
  "log",
  "pin-project-lite 0.2.13",
  "tracing-attributes",
@@ -13708,9 +13707,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-attributes"
-version = "0.1.26"
+version = "0.1.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f4f31f56159e98206da9efd823404b79b6ef3143b4a7ab76e67b1751b25a4ab"
+checksum = "34704c8d6ebcbc939824180af020566b01a7c01f80641264eba0999f6c2b6be7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -13719,9 +13718,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-core"
-version = "0.1.31"
+version = "0.1.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0955b8137a1df6f1a2e9a37d8a6656291ff0297c1a97c24e0d8425fe2312f79a"
+checksum = "c06d3da6113f116aaee68e4d601191614c9053067f9ab7f6edbcb161237daa54"
 dependencies = [
  "once_cell",
  "valuable",
@@ -13948,7 +13947,7 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "digest 0.10.7",
- "rand 0.8.5",
+ "rand 0.7.3",
  "static_assertions",
 ]
 
