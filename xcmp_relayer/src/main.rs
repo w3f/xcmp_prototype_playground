@@ -19,7 +19,7 @@ use futures::StreamExt;
 use subxt::{OnlineClient, PolkadotConfig, backend::rpc::{RpcClient, RpcClientT}};
 
 use mmr_rpc::LeavesProof;
-use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf};
+use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf, DataOrHash};
 
 use subxt_signer::sr25519::dev;
 
@@ -154,6 +154,18 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 	let channel_id = 0u64;
 	let root = generate_mmr_root(&client).await?;
 	let proof = generate_mmr_proof(&client).await?;
+
+	let leaves: Vec<EncodableOpaqueLeaf> = Decode::decode(&mut &proof.leaves.0[..])
+		.map_err(|e| anyhow::Error::new(e))?;
+
+	let leaves: Vec<_> = leaves.into_iter().map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf())).collect();
+
+	log::info!("Decoded leaves {:?}", leaves);
+
+	let decoded_proof: Proof<H256> = Decode::decode(&mut &proof.proof.0[..])
+		.map_err(|e| anyhow::Error::new(e))?;
+
+	log::info!("Decoded proof before submitting and verifying!!:::{:?}", decoded_proof);
 
 	let params = rpc_params![root, proof];
 

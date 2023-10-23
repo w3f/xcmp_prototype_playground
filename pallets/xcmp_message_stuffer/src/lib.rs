@@ -113,7 +113,16 @@ pub mod pallet {
 				root
 			);
 
-			verify_leaves_proof(root, nodes, mmr_proof).map_err(|_| Error::<T, I>::XcmpProofNotValid)?;
+			log::info!(
+				target: LOG_TARGET,
+				"BEFORE CALLING VERIFY proof: {:?}, root {:?}",
+				mmr_proof, root
+			);
+
+			verify_leaves_proof(root, nodes, mmr_proof).map_err(|e| {
+				log::info!("Error from verifying is {:?}", e);
+				Error::<T, I>::XcmpProofNotValid
+			})?;
 
 			log::info!(
 				target: LOG_TARGET,
