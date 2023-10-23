@@ -1,0 +1,43 @@
+[relaychain]
+default_command = "./bin/polkadot-v1.0.0"
+default_args = [ "-lparachain=debug" ]
+
+chain = "rococo-local"
+
+  [[relaychain.nodes]]
+  name = "alice"
+  ws_port = 54886
+  validator = true
+
+  [[relaychain.nodes]]
+  name = "bob"
+  validator = true
+
+  [[relaychain.nodes]]
+  name = "charlie"
+  validator = true
+
+  [[relaychain.nodes]]
+  name = "dave"
+  validator = true
+
+
+[[parachains]]
+id = 1000
+cumulus_based = true
+
+  [parachains.collator]
+  name = "parachain-A-1000-collator-01"
+  args = ["-lsync=debug --enable-offchain-indexing true --execution Native"]
+  ws_port = 54888 
+  command = "./bin/parachain-template-node-v1.1.0-1000"
+
+[[parachains]]
+id = 1001
+cumulus_based = true
+
+  [parachains.collator]
+  name = "parachain-B-1001-collator-01"
+  ws_port = 54887 
+  args = ["-lsync=debug --enable-offchain-indexing true"]
+  command = "./bin/parachain-template-node-v1.1.0-1001"
