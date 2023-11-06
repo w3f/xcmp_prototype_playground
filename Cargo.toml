@@ -6,7 +6,7 @@ members = [
 	"node",
 	"pallets/*",
 	"runtime",
-#    "xcmp_relayer",
+    "xcmp_relayer",
 ]
 resolver = "2"
 

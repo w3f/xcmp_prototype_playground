@@ -220,8 +220,8 @@ async fn log_all_blocks(clients: &[MultiClient]) -> anyhow::Result<()> {
 				let block_number = block.header().number;
 				let block_hash = block.hash();
 
-				log::info!("Block for {:?}: is block_hash {:?}, block_number {:?}",
-					client_type, block.hash(), block.number());
+				log::info!("Block for {:?}: is block_hash {:?}, block_number {:?}, block_header {:?}",
+					client_type, block.hash(), block.number(), block.header());
 			}
 
 			Ok::<(), anyhow::Error>(())

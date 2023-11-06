@@ -168,7 +168,8 @@ pub mod opaque {
 
 	pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
 	/// Opaque block header type.
-	pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+	pub type Header = generic::ParaHeader<BlockNumber, BlakeTwo256>;
+	// pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 	/// Opaque block type.
 	pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 	/// Opaque block identifier type.
@@ -675,9 +676,10 @@ impl_runtime_apis! {
 		}
 
 		fn finalize_block() -> <Block as BlockT>::Header {
-			let mut header = Executive::finalize_block();
-			header.set_xcmp_channel_root(XcmpChannelRootCollector::collect_roots());
-			header
+			// let mut header = Executive::finalize_block();
+			// header.set_xcmp_channel_root(XcmpChannelRootCollector::collect_roots());
+			// header
+			Executive::finalize_block()
 		}
 
 		fn inherent_extrinsics(data: sp_inherents::InherentData) -> Vec<<Block as BlockT>::Extrinsic> {
