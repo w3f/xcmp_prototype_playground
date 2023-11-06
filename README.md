@@ -83,7 +83,7 @@ pub struct RelayerProof {
             Where does message go from here? (Check UMP/DMP/HRMP code)
 
 
-## Building:
+# Building:
 
 #### Clone
 ```bash 
@@ -100,7 +100,7 @@ chmod +x build.sh && ./build.sh
 cp $POLKADOT_DIR/target/release/polkadot $PWD/bin/polkadot-v1.0.0
 ```
 
-## Running Entire setup E2E:
+# Running Entire setup E2E:
 
 #### Open Terminal
 ```bash
