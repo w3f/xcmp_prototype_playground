@@ -13237,7 +13237,7 @@ checksum = "734676eb262c623cec13c3155096e08d1f8f29adce39ba17948b18dad1e54142"
 [[package]]
 name = "subxt"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+source = "git+https://github.com/paritytech/subxt?branch=master#633219648daacab077799a7200882207e8aa3c9f"
 dependencies = [
  "async-trait",
  "base58",
@@ -13269,7 +13269,7 @@ dependencies = [
 [[package]]
 name = "subxt-codegen"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+source = "git+https://github.com/paritytech/subxt?branch=master#633219648daacab077799a7200882207e8aa3c9f"
 dependencies = [
  "frame-metadata 16.0.0",
  "heck",
@@ -14042,7 +14042,7 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "digest 0.10.7",
- "rand 0.8.5",
+ "rand 0.7.3",
  "static_assertions",
 ]
 
