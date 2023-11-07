@@ -83,3 +83,36 @@ pub struct RelayerProof {
             Where does message go from here? (Check UMP/DMP/HRMP code)
 
 
+# Building:
+
+#### Clone
+```bash 
+git clone git@github.com:w3f/xcmp_prototype_playground.git && cd xcmp_prototype_playground
+```
+
+#### Run Build script
+```bash
+chmod +x build.sh && ./build.sh
+```
+
+#### Compile and move Polkadot binary to `bin` directory with other binaries
+```bash
+cp $POLKADOT_DIR/target/release/polkadot $PWD/bin/polkadot-v1.0.0
+```
+
+# Running Entire setup E2E:
+
+#### Open Terminal
+```bash
+cd xcmp_prototype_playground
+```
+
+#### Run zombienet
+```bash
+zombienet-macos spawn -p native zombienet/config.toml
+```
+
+#### Open new terminal wait 1 minute for collators to be onboarded to relaychain
+```bash
+./target/release/xcmp_relayer
+```
