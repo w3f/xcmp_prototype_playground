@@ -155,26 +155,38 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 	let root = generate_mmr_root(&client).await?;
 	let proof = generate_mmr_proof(&client).await?;
 
-	let params = rpc_params![root, proof];
+	let params = rpc_params![root, proof.clone()];
 
 	let request: Option<bool> = client.rpc_client.request("mmr_verifyProofStateless", params).await?;
 	let verification = request.ok_or(RelayerError::Default)?;
 	log::info!("Was proof verified? Answer:: {}", verification);
 
-	let root = generate_mmr_root(&client).await?;
-	update_root(&client, root).await?;
-
 	let signer = dev::bob();
 
 	task::spawn(async move {
 		let mut blocks_sub = client.subxt_client.blocks().subscribe_best().await?;
-
 		while let Some(block) = blocks_sub.next().await {
 			let block = block?;
 
-			let proof = generate_mmr_proof(&client).await?;
+			let _ = update_root(&client, root).await?;
 
-			submit_proof(&client, proof).await?;
+			// check if current on chain root is equal to the original root to submit proof
+			let onchain_root_query = crate::polkadot::storage().msg_stuffer_para_a().xcmp_channel_roots(0);
+			let onchain_root = client.subxt_client
+				.storage()
+				.at_latest()
+				.await?
+				.fetch(&onchain_root_query)
+				.await?
+				.ok_or(RelayerError::Default)?;
+
+			if onchain_root == root {
+				submit_proof(&client, proof.clone()).await?;
+			}
+			else {
+				log::info!("Root on chain {:?} still doesnt match original root {:?}", onchain_root, root);
+			}
+
 			log::info!("Got after submitting the proof");
 		}
 		log::info!("EXITING!!!!!");
