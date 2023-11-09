@@ -28,7 +28,7 @@ quote = "1.0.23"
 syn = "2.0.15"
 
 # Core-only dependencies
-array-bytes = "6.0.0"
+array-bytes = "6.2.0"
 
 
 anyhow = "1.0.69"
