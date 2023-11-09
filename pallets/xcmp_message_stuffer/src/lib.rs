@@ -99,12 +99,6 @@ pub mod pallet {
 				.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
 				.collect();
 
-			log::info!(
-				target: LOG_TARGET,
-				"Leaves are {:?}",
-				nodes
-			);
-
 			let root = Self::xcmp_channel_roots(channel_id).ok_or(Error::<T, I>::XcmpNoChannelRootForChannelId)?;
 
 			log::info!(
