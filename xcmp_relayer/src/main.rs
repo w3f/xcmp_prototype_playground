@@ -152,8 +152,8 @@ async fn submit_proof(client: &MultiClient, proof: LeavesProof<H256>) -> anyhow:
 async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 	let client = client.clone();
 	let channel_id = 0u64;
-	let root = generate_mmr_root(&client).await?;
-	let proof = generate_mmr_proof(&client).await?;
+	let mut root = generate_mmr_root(&client).await?;
+	let mut proof = generate_mmr_proof(&client).await?;
 
 	let params = rpc_params![root, proof.clone()];
 
@@ -168,26 +168,42 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 		while let Some(block) = blocks_sub.next().await {
 			let block = block?;
 
-			let _ = update_root(&client, root).await?;
-
 			// check if current on chain root is equal to the original root to submit proof
 			let onchain_root_query = crate::polkadot::storage().msg_stuffer_para_a().xcmp_channel_roots(0);
-			let onchain_root = client.subxt_client
-				.storage()
-				.at_latest()
-				.await?
-				.fetch(&onchain_root_query)
-				.await?
-				.ok_or(RelayerError::Default)?;
+			let onchain_root = match client.subxt_client
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&onchain_root_query)
+			.await {
+				Ok(Some(root)) => root,
+				Ok(None) => H256::zero(),
+				Err(e) => H256::zero()
+			};
+
+			let update_root_string = match update_root(&client, root).await {
+				Ok(_) => {
+					"Updating root in loop".to_string()
+				},
+				Err(e) => format!("Cant update root on chain yet {:?}", e),
+			};
+			log::info!("{}", update_root_string);
 
 			if onchain_root == root {
-				submit_proof(&client, proof.clone()).await?;
+				log::info!("onchain_root matches!!! submitting now!!");
+				let submit_proof_string = match submit_proof(&client, proof.clone()).await {
+					Ok(_) => {
+						root = generate_mmr_root(&client).await?;
+						proof = generate_mmr_proof(&client).await?;
+						"Submit proof successfully submitted".to_string()
+					},
+					Err(e) => format!("Cant submit proof on chain yet {:?}", e),
+				};
+				log::info!("{}", submit_proof_string);
 			}
 			else {
 				log::info!("Root on chain {:?} still doesnt match original root {:?}", onchain_root, root);
 			}
-
-			log::info!("Got after submitting the proof");
 		}
 		log::info!("EXITING!!!!!");
 		Ok::<(), anyhow::Error>(())
@@ -209,7 +225,7 @@ async fn log_all_blocks(clients: &[MultiClient]) -> anyhow::Result<()> {
 				let block_number = block.header().number;
 				let block_hash = block.hash();
 
-				log::info!("Block for {:?}: is block_hash {:?}, block_number {:?}",
+				log::debug!("Block for {:?}: is block_hash {:?}, block_number {:?}",
 					client_type, block.hash(), block.number());
 			}
 
