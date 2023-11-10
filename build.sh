@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 
 # Function to toggle the value between 1000 and 1001 on a specific line
 toggle_paraid() {
