@@ -93,15 +93,14 @@ async fn main() -> anyhow::Result<()> {
 	Ok(())
 }
 
-async fn update_root(client: &MultiClient, root: H256, nonce: u64) -> anyhow::Result<()> {
+async fn update_root(client: &MultiClient, root: H256) -> anyhow::Result<()> {
 	let signer = dev::alice();
 	let channel_id = 0u64;
 	let tx = crate::polkadot::tx().msg_stuffer_para_a().update_root(root, channel_id);
 
-	let submit_ext = client.subxt_client.tx().create_signed_with_nonce(&tx, &signer, nonce, Default::default())?;
-	let tx_progress = submit_ext.submit_and_watch().await?;
+	let tx_progress = client.subxt_client.tx().sign_and_submit_then_watch_default(&tx, &signer).await?;
 	let hash_tx = tx_progress.extrinsic_hash();
-	match tx_progress.wait_for_finalized().await {
+	match tx_progress.wait_for_in_block().await {
 		Ok(tx_in_block) => {
 			match tx_in_block.wait_for_success().await {
 				Ok(events) => { log::info!("Got the tx in a block and it succeeded! {:?}", events); },
@@ -116,7 +115,7 @@ async fn update_root(client: &MultiClient, root: H256, nonce: u64) -> anyhow::Re
 	Ok(())
 }
 
-async fn submit_proof(client: &MultiClient, proof: LeavesProof<H256>, nonce: u64) -> anyhow::Result<()> {
+async fn submit_proof(client: &MultiClient, proof: LeavesProof<H256>) -> anyhow::Result<()> {
 	let signer = dev::bob();
 	let channel_id = 0u64;
 	let leaves = Decode::decode(&mut &proof.leaves.0[..])
@@ -131,11 +130,10 @@ async fn submit_proof(client: &MultiClient, proof: LeavesProof<H256>, nonce: u64
 
 	let tx = crate::polkadot::tx().msg_stuffer_para_a().submit_xcmp_proof(decoded_proof, leaves, channel_id);
 
-	let submit_ext = client.subxt_client.tx().create_signed_with_nonce(&tx, &signer, nonce, Default::default())?;
-	let tx_progress = submit_ext.submit_and_watch().await?;
+	let tx_progress = client.subxt_client.tx().sign_and_submit_then_watch_default(&tx, &signer).await?;
 	let hash_tx = tx_progress.extrinsic_hash();
 	log::info!("Got After submitting submit_xcmp_proof");
-	match tx_progress.wait_for_finalized().await {
+	match tx_progress.wait_for_in_block().await {
 		Ok(tx_in_block) => {
 			match tx_in_block.wait_for_success().await {
 				Ok(events) => { log::info!("Got the tx in a block and it succeeded! {:?}", events); },
@@ -154,51 +152,58 @@ async fn submit_proof(client: &MultiClient, proof: LeavesProof<H256>, nonce: u64
 async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 	let client = client.clone();
 	let channel_id = 0u64;
-	let root = generate_mmr_root(&client).await?;
-	let proof = generate_mmr_proof(&client).await?;
+	let mut root = generate_mmr_root(&client).await?;
+	let mut proof = generate_mmr_proof(&client).await?;
 
-	let params = rpc_params![root, proof];
+	let params = rpc_params![root, proof.clone()];
 
 	let request: Option<bool> = client.rpc_client.request("mmr_verifyProofStateless", params).await?;
 	let verification = request.ok_or(RelayerError::Default)?;
 	log::info!("Was proof verified? Answer:: {}", verification);
 
-	update_root(&client, root, 0).await?;
-
-	let alice_signer = dev::alice();
-	let bob_signer = dev::bob();
+	let signer = dev::bob();
 
 	task::spawn(async move {
 		let mut blocks_sub = client.subxt_client.blocks().subscribe_best().await?;
-
 		while let Some(block) = blocks_sub.next().await {
 			let block = block?;
 
-			let alice_account_nonce = client.subxt_client
-				.blocks()
-				.at(block.hash())
-				.await?
-				.account_nonce(&alice_signer.public_key().to_account_id())
-				.await?;
+			// check if current on chain root is equal to the original root to submit proof
+			let onchain_root_query = crate::polkadot::storage().msg_stuffer_para_a().xcmp_channel_roots(0);
+			let onchain_root = match client.subxt_client
+			.storage()
+			.at_latest()
+			.await?
+			.fetch(&onchain_root_query)
+			.await {
+				Ok(Some(root)) => root,
+				Ok(None) => H256::zero(),
+				Err(e) => H256::zero()
+			};
 
-			log::info!("Alice current account nonce: {}", alice_account_nonce);
+			let update_root_string = match update_root(&client, root).await {
+				Ok(_) => {
+					"Updating root in loop".to_string()
+				},
+				Err(e) => format!("Cant update root on chain yet {:?}", e),
+			};
+			log::info!("{}", update_root_string);
 
-			let bob_account_nonce = client.subxt_client
-				.blocks()
-				.at(block.hash())
-				.await?
-				.account_nonce(&bob_signer.public_key().to_account_id())
-				.await?;
-
-			log::info!("Bob current account nonce: {}", bob_account_nonce);
-
-			let root = generate_mmr_root(&client).await?;
-			update_root(&client, root, alice_account_nonce).await?;
-
-			let proof = generate_mmr_proof(&client).await?;
-
-			submit_proof(&client, proof, bob_account_nonce).await?;
-			log::info!("Got after submitting the proof");
+			if onchain_root == root {
+				log::info!("onchain_root matches!!! submitting now!!");
+				let submit_proof_string = match submit_proof(&client, proof.clone()).await {
+					Ok(_) => {
+						root = generate_mmr_root(&client).await?;
+						proof = generate_mmr_proof(&client).await?;
+						"Submit proof successfully submitted".to_string()
+					},
+					Err(e) => format!("Cant submit proof on chain yet {:?}", e),
+				};
+				log::info!("{}", submit_proof_string);
+			}
+			else {
+				log::info!("Root on chain {:?} still doesnt match original root {:?}", onchain_root, root);
+			}
 		}
 		log::info!("EXITING!!!!!");
 		Ok::<(), anyhow::Error>(())
@@ -220,8 +225,8 @@ async fn log_all_blocks(clients: &[MultiClient]) -> anyhow::Result<()> {
 				let block_number = block.header().number;
 				let block_hash = block.hash();
 
-				log::info!("Block for {:?}: is block_hash {:?}, block_number {:?}, block_header {:?}",
-					client_type, block.hash(), block.number(), block.header());
+				log::debug!("Block for {:?}: is block_hash {:?}, block_number {:?}",
+					client_type, block.hash(), block.number());
 			}
 
 			Ok::<(), anyhow::Error>(())
