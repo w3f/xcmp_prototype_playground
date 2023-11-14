@@ -9,7 +9,9 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 mod weights;
 pub mod xcm_config;
 
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::{
+	ParaId, CollectXcmpChannelMmrRoots,
+};
 use sp_core::Hasher;
 
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
@@ -22,8 +24,6 @@ use sp_runtime::{
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature, generic::XcmpRootChanger,
 };
-
-use cumulus_primitives_core::xcmr_digest::xcmp_channel_merkle_root_item;
 
 use sp_consensus_beefy::mmr::MmrLeafVersion;
 
@@ -390,6 +390,7 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
 	type OutboundXcmpMessageSource = XcmpQueue;
 	type DmpMessageHandler = DmpQueue;
 	type ReservedDmpWeight = ReservedDmpWeight;
+	type XcmpChannelRootCollector = XcmpChannelRootCollector;
 	type XcmpMessageHandler = XcmpQueue;
 	type ReservedXcmpWeight = ReservedXcmpWeight;
 	type CheckAssociatedRelayNumber = RelayNumberStrictlyIncreases;
@@ -492,16 +493,10 @@ impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 	}
 }
 
-pub trait CollectMmrRoots {
-	type MerkleRoot;
-	fn collect_roots() -> Self::MerkleRoot;
-}
-
 pub struct XcmpChannelRootCollector;
-impl CollectMmrRoots for XcmpChannelRootCollector {
-	type MerkleRoot = Hash;
-	fn collect_roots() -> Self::MerkleRoot {
-		// TODO: add this root to the ParaHeader
+impl CollectXcmpChannelMmrRoots for XcmpChannelRootCollector {
+	type XcmpChannelMerkleRoot = Hash;
+	fn collect_roots() -> Self::XcmpChannelMerkleRoot {
 		// TODO: Make this a trie root instead of a binary_merkle_tree
 		let xcmp_channel_mmr_roots = vec![MmrParaA::mmr_root_hash(), MmrParaB::mmr_root_hash()];
 		binary_merkle_tree::merkle_root::<mmr::Hashing, _>(
@@ -678,11 +673,7 @@ impl_runtime_apis! {
 		}
 
 		fn finalize_block() -> <Block as BlockT>::Header {
-			let mut header = Executive::finalize_block();
-			// Need to make sure to add this only at the very end of a block
-			let digest_item = xcmp_channel_merkle_root_item(XcmpChannelRootCollector::collect_roots());
-			header.digest.push(digest_item);
-			header
+			Executive::finalize_block()
 		}
 
 		fn inherent_extrinsics(data: sp_inherents::InherentData) -> Vec<<Block as BlockT>::Extrinsic> {
