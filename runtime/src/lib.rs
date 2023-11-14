@@ -9,7 +9,9 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 mod weights;
 pub mod xcm_config;
 
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::{
+	ParaId, CollectXcmpChannelMmrRoots,
+};
 use sp_core::Hasher;
 
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
@@ -20,10 +22,12 @@ use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, Verify, Keccak256},
 	transaction_validity::{TransactionSource, TransactionValidity},
-	ApplyExtrinsicResult, MultiSignature,
+	ApplyExtrinsicResult, MultiSignature, generic::XcmpRootChanger,
 };
 
 use sp_consensus_beefy::mmr::MmrLeafVersion;
+
+use parity_scale_codec::Encode;
 
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -167,6 +171,7 @@ pub mod opaque {
 	pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
 	/// Opaque block header type.
 	pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+	// pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 	/// Opaque block type.
 	pub type Block = generic::Block<Header, UncheckedExtrinsic>;
 	/// Opaque block identifier type.
@@ -385,6 +390,7 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
 	type OutboundXcmpMessageSource = XcmpQueue;
 	type DmpMessageHandler = DmpQueue;
 	type ReservedDmpWeight = ReservedDmpWeight;
+	type XcmpChannelRootCollector = XcmpChannelRootCollector;
 	type XcmpMessageHandler = XcmpQueue;
 	type ReservedXcmpWeight = ReservedXcmpWeight;
 	type CheckAssociatedRelayNumber = RelayNumberStrictlyIncreases;
@@ -486,6 +492,19 @@ impl XcmpMessageProvider<Hash> for XcmpDataProvider {
 		msg_buffer
 	}
 }
+
+pub struct XcmpChannelRootCollector;
+impl CollectXcmpChannelMmrRoots for XcmpChannelRootCollector {
+	type XcmpChannelMerkleRoot = Hash;
+	fn collect_roots() -> Self::XcmpChannelMerkleRoot {
+		// TODO: Make this a trie root instead of a binary_merkle_tree
+		let xcmp_channel_mmr_roots = vec![MmrParaA::mmr_root_hash(), MmrParaB::mmr_root_hash()];
+		binary_merkle_tree::merkle_root::<mmr::Hashing, _>(
+			xcmp_channel_mmr_roots.into_iter().map(|root| root.encode())
+		).into()
+	}
+}
+
 
 parameter_types! {
 	/// Version of the produced MMR leaf.

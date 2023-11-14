@@ -21,7 +21,7 @@ use subxt::{OnlineClient, PolkadotConfig, backend::rpc::{RpcClient, RpcClientT}}
 use mmr_rpc::LeavesProof;
 use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf};
 
-use subxt_signer::sr25519::dev;
+use subxt_signer::{sr25519::dev, ecdsa::dev::alice};
 
 #[subxt::subxt(runtime_metadata_url = "ws://localhost:54887")]
 pub mod polkadot { }

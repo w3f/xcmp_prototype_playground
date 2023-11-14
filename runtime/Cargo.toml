@@ -25,6 +25,7 @@ smallvec = { workspace = true }
 pallet-xcmp-message-stuffer = { workspace = true }
 
 # Substrate
+binary-merkle-tree = { workspace = true }
 frame-benchmarking = { workspace = true, optional = true }
 frame-executive = { workspace = true }
 frame-support = { workspace = true }
