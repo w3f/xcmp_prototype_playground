@@ -23,6 +23,8 @@ use sp_runtime::{
 	ApplyExtrinsicResult, MultiSignature, generic::XcmpRootChanger,
 };
 
+use cumulus_primitives_core::xcmr_digest::xcmp_channel_merkle_root_item;
+
 use sp_consensus_beefy::mmr::MmrLeafVersion;
 
 use parity_scale_codec::Encode;
@@ -92,7 +94,7 @@ pub type BlockNumber = u32;
 pub type Address = MultiAddress<AccountId, ()>;
 
 /// Block header type as expected by this runtime.
-pub type Header = generic::ParaHeader<BlockNumber, BlakeTwo256>;
+pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 
 /// Block type as expected by this runtime.
 pub type Block = generic::Block<Header, UncheckedExtrinsic>;
@@ -168,7 +170,7 @@ pub mod opaque {
 
 	pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
 	/// Opaque block header type.
-	pub type Header = generic::ParaHeader<BlockNumber, BlakeTwo256>;
+	pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 	// pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 	/// Opaque block type.
 	pub type Block = generic::Block<Header, UncheckedExtrinsic>;
@@ -676,10 +678,11 @@ impl_runtime_apis! {
 		}
 
 		fn finalize_block() -> <Block as BlockT>::Header {
-			// let mut header = Executive::finalize_block();
-			// header.set_xcmp_channel_root(XcmpChannelRootCollector::collect_roots());
-			// header
-			Executive::finalize_block()
+			let mut header = Executive::finalize_block();
+			// Need to make sure to add this only at the very end of a block
+			let digest_item = xcmp_channel_merkle_root_item(XcmpChannelRootCollector::collect_roots());
+			header.digest.push(digest_item);
+			header
 		}
 
 		fn inherent_extrinsics(data: sp_inherents::InherentData) -> Vec<<Block as BlockT>::Extrinsic> {
