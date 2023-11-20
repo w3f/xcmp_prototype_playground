@@ -532,6 +532,7 @@ impl pallet_xcmp_message_stuffer::Config<ParaAChannel> for Runtime {
 	type LeafVersion = LeafVersion;
 	type XcmpDataProvider = XcmpDataProvider;
 	type RelayerOrigin = EnsureRoot<AccountId>;
+	type BeefyRootProvider = ParachainSystem;
 }
 
 type ParaAMmr = pallet_mmr::Instance1;
@@ -554,6 +555,7 @@ impl pallet_xcmp_message_stuffer::Config<ParaBChannel> for Runtime {
 	type LeafVersion = LeafVersion;
 	type XcmpDataProvider = XcmpDataProvider;
 	type RelayerOrigin = EnsureRoot<AccountId>;
+	type BeefyRootProvider = ParachainSystem;
 }
 
 type ParaBMmr = pallet_mmr::Instance2;
