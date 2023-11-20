@@ -6,7 +6,7 @@ use sp_consensus_beefy::mmr::MmrLeafVersion;
 
 use frame_support::{dispatch::{DispatchResult}, pallet_prelude::*,};
 use frame_system::pallet_prelude::*;
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::{ParaId, GetBeefyRoot};
 use sp_runtime::traits::{Hash as HashT, Keccak256};
 use sp_core::H256;
 
@@ -31,7 +31,6 @@ pub trait XcmpMessageProvider<Hash> {
 }
 
 type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
-// type MmrProof<T> = Proof<<T as frame_system::Config>::Hash>;
 type MmrProof = Proof<H256>;
 type LeafOf<T, I> = <crate::Pallet<T, I> as LeafDataProvider>::LeafData;
 type ChannelId = u64;
@@ -47,12 +46,14 @@ pub mod pallet {
 		type LeafVersion: Get<MmrLeafVersion>;
 		type XcmpDataProvider: XcmpMessageProvider<Self::Hash>;
 		type RelayerOrigin: EnsureOrigin<Self::RuntimeOrigin>;
+		/// This is used when updating the current `XcmpChannelRoots`
+		type BeefyRootProvider: GetBeefyRoot;
 	}
 
 	#[pallet::pallet]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
 
-	/// These are the MMR roots for each open XCMP channel as updated by the Relaychain
+	/// These are the MMR roots for each open XCMP channel as verified against current Relay Chain Beefy Root
 	#[pallet::storage]
 	#[pallet::getter(fn xcmp_channel_roots)]
 	pub type XcmpChannelRoots<T: Config<I>, I: 'static = ()> = StorageMap<_, Identity, ChannelId, H256, OptionQuery>;
@@ -142,6 +143,8 @@ pub mod pallet {
 	}
 
 }
+
+// TODO: Add Inherent which can update the current `XcmpChannelRoots` against the current BeefyMmrRoot
 
 pub struct OnNewRootSatisfier<T>(PhantomData<T>);
 
