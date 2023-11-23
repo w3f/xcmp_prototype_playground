@@ -11236,9 +11236,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7789f5728e4e954aaa20cadcc370b99096fb8645fca3c9333ace44bb18f30095"
+checksum = "7caaf753f8ed1ab4752c6afb20174f03598c664724e0e32628e161c21000ff76"
 dependencies = [
  "derive_more",
  "parity-scale-codec",
@@ -11251,9 +11251,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode-derive"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "27873eb6005868f8cc72dcfe109fae664cf51223d35387bc2f28be4c28d94c47"
+checksum = "d3475108a1b62c7efd1b5c65974f30109a598b2f45f23c9ae030acb9686966db"
 dependencies = [
  "darling 0.14.4",
  "proc-macro-crate",
@@ -11318,9 +11318,9 @@ dependencies = [
 
 [[package]]
 name = "scale-value"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6538d1cc1af9c0baf401c57da8a6d4730ef582db0d330d2efa56ec946b5b0283"
+checksum = "58223c7691bf0bd46b43c9aea6f0472d1067f378d574180232358d7c6e0a8089"
 dependencies = [
  "base58",
  "blake2",
@@ -13237,7 +13237,7 @@ checksum = "734676eb262c623cec13c3155096e08d1f8f29adce39ba17948b18dad1e54142"
 [[package]]
 name = "subxt"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+source = "git+https://github.com/paritytech/subxt?branch=master#6855b1ffd2986cc846ea301dac8a91b128291f05"
 dependencies = [
  "async-trait",
  "base58",
@@ -13269,7 +13269,7 @@ dependencies = [
 [[package]]
 name = "subxt-codegen"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+source = "git+https://github.com/paritytech/subxt?branch=master#6855b1ffd2986cc846ea301dac8a91b128291f05"
 dependencies = [
  "frame-metadata 16.0.0",
  "heck",
@@ -13288,7 +13288,7 @@ dependencies = [
 [[package]]
 name = "subxt-lightclient"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d8c0ef9034de80893132ee50abf0c41167d18846"
+source = "git+https://github.com/paritytech/subxt?branch=master#6855b1ffd2986cc846ea301dac8a91b128291f05"
 dependencies = [
  "futures",
  "futures-util",
@@ -13304,7 +13304,7 @@ dependencies = [
 [[package]]
 name = "subxt-macro"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d8c0ef9034de80893132ee50abf0c41167d18846"
+source = "git+https://github.com/paritytech/subxt?branch=master#6855b1ffd2986cc846ea301dac8a91b128291f05"
 dependencies = [
  "darling 0.20.3",
  "parity-scale-codec",
@@ -13316,7 +13316,7 @@ dependencies = [
 [[package]]
 name = "subxt-metadata"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d8c0ef9034de80893132ee50abf0c41167d18846"
+source = "git+https://github.com/paritytech/subxt?branch=master#6855b1ffd2986cc846ea301dac8a91b128291f05"
 dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
@@ -13328,7 +13328,7 @@ dependencies = [
 [[package]]
 name = "subxt-signer"
 version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d8c0ef9034de80893132ee50abf0c41167d18846"
+source = "git+https://github.com/paritytech/subxt?branch=master#6855b1ffd2986cc846ea301dac8a91b128291f05"
 dependencies = [
  "bip39",
  "hex",
@@ -14042,7 +14042,7 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "digest 0.10.7",
- "rand 0.8.5",
+ "rand 0.7.3",
  "static_assertions",
 ]
 
