@@ -95,9 +95,20 @@ git clone git@github.com:w3f/xcmp_prototype_playground.git && cd xcmp_prototype_
 chmod +x build.sh && ./build.sh
 ```
 
-#### Compile and move Polkadot binary to `bin` directory with other binaries
+#### Clone and compile current XCMP supported Polkadot
 ```bash
-cp $POLKADOT_DIR/target/release/polkadot $PWD/bin/polkadot-v1.0.0
+cd ../ && \
+git clone https://github.com/coax1d/polkadot-sdk/tree/xcmp_customized_sdk && \
+cd polkadot-sdk && \
+cargo build --release -p polkadot
+```
+
+#### Move all necessary Polkadot binaries to bin directory with other collator binaries 
+```bash
+cd ../xcmp_prototype_playground && \
+cp ../polkadot-sdk/target/release/polkadot bin/polkadot && \
+cp ../polkadot-sdk/target/release/polkadot-execute-worker bin/polkadot-execute-worker && \
+cp ../polkadot-sdk/target/release/polkadot-prepare-worker bin/polkadot-prepare-worker
 ```
 
 # Running Entire setup E2E:
@@ -112,7 +123,7 @@ cd xcmp_prototype_playground
 zombienet-macos spawn -p native zombienet/config.toml
 ```
 
-#### Open new terminal wait 1 minute for collators to be onboarded to relaychain
+#### Open new terminal wait ~ 1 minute for collators to be onboarded to Relaychain
 ```bash
 ./target/release/xcmp_relayer
 ```
