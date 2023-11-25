@@ -1,5 +1,5 @@
 [relaychain]
-default_command = "./bin/polkadot-v1.0.0"
+default_command = "./bin/polkadot"
 default_args = [ "-lparachain=debug" ]
 
 chain = "rococo-local"
