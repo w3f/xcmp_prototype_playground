@@ -34,6 +34,18 @@ type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMess
 type MmrProof = Proof<H256>;
 type LeafOf<T, I> = <crate::Pallet<T, I> as LeafDataProvider>::LeafData;
 type ChannelId = u64;
+type BinaryMerkleProof = ();
+
+
+#[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
+pub struct XcmpProof {
+	// TODO: Probably should rename each of these stages to some fancy name
+	// TODO: Remove tuples
+	pub stage_1: (MmrProof, Vec<EncodableOpaqueLeaf>),
+	pub stage_2: BinaryMerkleProof,
+	pub stage_3: BinaryMerkleProof,
+	pub stage_4: (MmrProof, Vec<EncodableOpaqueLeaf>),
+}
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -82,8 +94,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config<I>, I: 'static> Pallet<T, I> {
 
-		// TODO: Retrieve latest valid MmrChannelRoots from Relaychain (Perhaps this is done in on_initialize)
-
+		// TODO: This will
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn submit_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof, leaves: Vec<EncodableOpaqueLeaf>, channel_id: u64) -> DispatchResult {
@@ -138,6 +149,98 @@ pub mod pallet {
 				"Updated root for channel_id: {:?}, root: {:?}",
 				channel_id, root
 			);
+			Ok(())
+		}
+
+		/// For now there is just one leaf in each membership proof
+		/// TODO: Change to support multiple leaves..
+		#[pallet::call_index(2)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn submit_big_proof(origin: OriginFor<T>, xcmp_proof: XcmpProof) -> DispatchResult {
+			ensure_signed(origin)?;
+
+			log::info!(
+				target: LOG_TARGET,
+				"Called submit big proof",
+			);
+			// Verify stage 1 via grabbing Beefy Root and checking against stage 1
+			let (stage_1_proof, stage_1_leaves) = xcmp_proof.stage_1;
+			// Get currenty Beefy Mmr root
+			let beefy_root = T::BeefyRootProvider::get_root().unwrap_or(Default::default());
+
+			log::info!(
+				target: LOG_TARGET,
+				"Current on chain Beefy Root is: {:?}",
+				beefy_root
+			);
+
+			let nodes: Vec<_> = stage_1_leaves
+				.clone()
+				.into_iter()
+				.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
+				.collect();
+
+			// TODO: Replace this error with an Error that specifies stage_1 of proof verification failed
+			verify_leaves_proof(beefy_root.into(), nodes, stage_1_proof).map_err(|_| Error::<T, I>::XcmpProofNotValid)?;
+
+			// Verify stage 2..
+			// grab ParaHeader root from stage_1_proof
+			// let para_header_root = Decode::decode(stage_1_leaves)
+			// let (stage_2_proof, stage_2_leaves) = xcmp_proof.stage_2;
+
+			// These are different leaves they arent the MmrLeaves they are Binary Merkle Leaves
+			// This will be a bit different but same rough idea as the Mmr
+			// let nodes: Vec<_> = stage_2_leaves
+			// 	.clone()
+			// 	.into_iter()
+			// 	.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
+			// 	.collect();
+
+			// binary merkle proof verification of para_header_root against stage_2_proof(leaves are (para_id, para_header))
+			// verify_proof(root, nodes, stage_2_proof);
+
+			// let (para_id, para_header) = Decode::decode(stage_2_leaves);
+			// Check channels storage to make sure this ParaId is someone that we support
+			// if !XcmpChannels::<T>::exists(para_id) {
+					// return Error::<T>::XcmpProofNoChannelWithSender
+			// }
+
+			// Verify stage 3..
+			// extract xcmp_root from paraheader..
+			// let xcmp_root = extract(para_header)
+			// let (stage_3_proof, stage_3_leaves) = xcmp_proof.stage_3;
+
+			// These are different leaves they arent the MmrLeaves they are Binary Merkle Leaves
+			// This will be a bit different but same rough idea as the Mmr
+			// let nodes: Vec<_> = stage_3_leaves
+			// 	.clone()
+			// 	.into_iter()
+			// 	.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
+			// 	.collect();
+
+			// binary merkle proof verification of xcmp_root against stage_3_proof(mmr_root_from_sender)
+			// verify_proof(xcmp_root, nodes, stage_3_proof)?;
+
+			// Verify stage 4..
+			// let mmr_root = Decode::decode(stage_3_leaves);
+			// let (stage_4_proof, stage_4_leaves) = xcmp_proof.stage_4;
+
+			// let nodes: Vec<_> = stage_4_leaves
+			// 	.clone()
+			// 	.into_iter()
+			// 	.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
+			// 	.collect();
+
+			// TODO: Replace this error with an Error that specifies stage_4 of proof verification failed
+			// verify_leaves_proof(mmr_root.into(), nodes, stage_4_proof).map_err(|_| Error::<T, I>::XcmpProofNotValid)?;
+
+			// Now process messages upstream
+			// let xcmp_messages = Decode::decode(stage_4_leaves);
+			// Send Xcmp Messages upstream to be decoded to XCM messages and processed
+			// T::ProcessXcmpMessages(xcmp_messages);
+
+			// Log Event..
+
 			Ok(())
 		}
 	}
