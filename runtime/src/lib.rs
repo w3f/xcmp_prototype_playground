@@ -10,7 +10,7 @@ mod weights;
 pub mod xcm_config;
 
 use cumulus_primitives_core::{
-	ParaId, CollectXcmpChannelMmrRoots,
+	ParaId, CollectXcmpChannelMmrRoots, GetBeefyRoot
 };
 use sp_core::Hasher;
 
@@ -721,6 +721,13 @@ impl_runtime_apis! {
 	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce> for Runtime {
 		fn account_nonce(account: AccountId) -> Nonce {
 			System::account_nonce(account)
+		}
+	}
+
+	impl cumulus_pallet_parachain_system::MessagingApi<Block, ParachainSystem> for Runtime {
+		fn get_current_beefy_root() -> <ParachainSystem as GetBeefyRoot>::Root {
+			// TODO: For now if there is no root just return H256::zero() Remove! for better error handling
+			<ParachainSystem as GetBeefyRoot>::get_root().unwrap_or(Default::default())
 		}
 	}
 

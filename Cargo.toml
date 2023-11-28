@@ -87,8 +87,8 @@ sp-timestamp = { default_features = false, git = "https://github.com/coax1d/polk
 sp-transaction-pool = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
 sp-version = { default-features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
 
-subxt = { git = 'https://github.com/paritytech/subxt', branch = "master" }
-subxt-signer = { git = 'https://github.com/paritytech/subxt', branch = "master", features = ["subxt"] }
+subxt = { git = 'https://github.com/paritytech/subxt', rev = "d44941fb1bdb1b46ef8537dd7511654facc3f763" }
+subxt-signer = { git = 'https://github.com/paritytech/subxt', rev = "d44941fb1bdb1b46ef8537dd7511654facc3f763", features = ["subxt"] }
 
 # Node Deps
 frame-benchmarking-cli = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
