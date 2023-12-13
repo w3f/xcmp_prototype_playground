@@ -2098,7 +2098,7 @@ dependencies = [
  "sp-application-crypto",
  "sp-consensus-aura",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -2114,7 +2114,7 @@ dependencies = [
  "scale-info",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "staging-xcm",
 ]
 
@@ -2141,7 +2141,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-state-machine",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-trie",
  "sp-version",
  "staging-xcm",
@@ -2170,7 +2170,7 @@ dependencies = [
  "pallet-session",
  "parity-scale-codec",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -2185,7 +2185,7 @@ dependencies = [
  "scale-info",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "staging-xcm",
 ]
 
@@ -2205,7 +2205,7 @@ dependencies = [
  "scale-info",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "staging-xcm",
  "staging-xcm-executor",
 ]
@@ -2221,7 +2221,7 @@ dependencies = [
  "sp-api",
  "sp-consensus-aura",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -2236,7 +2236,7 @@ dependencies = [
  "scale-info",
  "sp-api",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-trie",
  "staging-xcm",
 ]
@@ -2258,7 +2258,7 @@ dependencies = [
  "sp-inherents",
  "sp-runtime",
  "sp-state-machine",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-storage",
  "sp-trie",
  "tracing",
@@ -2273,7 +2273,7 @@ dependencies = [
  "futures",
  "parity-scale-codec",
  "sp-inherents",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-timestamp",
 ]
 
@@ -2289,7 +2289,7 @@ dependencies = [
  "polkadot-runtime-common",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "staging-xcm",
  "staging-xcm-builder",
  "staging-xcm-executor",
@@ -2420,7 +2420,7 @@ dependencies = [
  "polkadot-primitives",
  "sp-runtime",
  "sp-state-machine",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-trie",
 ]
 
@@ -3486,7 +3486,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-runtime-interface",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-storage",
  "static_assertions",
 ]
@@ -3564,7 +3564,7 @@ dependencies = [
  "sp-core",
  "sp-npos-elections",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -3581,7 +3581,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-tracing",
 ]
 
@@ -3663,7 +3663,7 @@ dependencies = [
  "sp-runtime",
  "sp-staking",
  "sp-state-machine",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-tracing",
  "sp-weights",
  "static_assertions",
@@ -3724,7 +3724,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-version",
  "sp-weights",
 ]
@@ -3741,7 +3741,7 @@ dependencies = [
  "scale-info",
  "sp-core",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -3762,7 +3762,7 @@ dependencies = [
  "parity-scale-codec",
  "sp-api",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -3995,6 +3995,16 @@ dependencies = [
  "cfg-if",
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
+]
+
+[[package]]
+name = "getrandom_or_panic"
+version = "0.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ea1015b5a70616b688dc230cfe50c8af89d972cb132d5a622814d29773b10b9"
+dependencies = [
+ "rand 0.8.5",
+ "rand_core 0.6.4",
 ]
 
 [[package]]
@@ -5596,6 +5606,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a4a83fb7698b3643a0e34f9ae6f2e8f0178c0fd42f8b59d493aa271ff3a5bf21"
 
 [[package]]
+name = "lru"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2994eeba8ed550fd9b47a0b38f0242bc3344e496483c6180b69139cc2fa5d1d7"
+dependencies = [
+ "hashbrown 0.14.2",
+]
+
+[[package]]
 name = "lru-cache"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6369,7 +6388,7 @@ dependencies = [
  "sp-application-crypto",
  "sp-consensus-aura",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6385,7 +6404,7 @@ dependencies = [
  "sp-application-crypto",
  "sp-authority-discovery",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6399,7 +6418,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6423,7 +6442,7 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6444,7 +6463,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-tracing",
 ]
 
@@ -6460,7 +6479,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6480,7 +6499,7 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6505,7 +6524,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-state-machine",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6523,7 +6542,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6542,7 +6561,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6561,7 +6580,7 @@ dependencies = [
  "scale-info",
  "sp-runtime",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6578,7 +6597,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6595,7 +6614,7 @@ dependencies = [
  "serde",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6613,7 +6632,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6635,7 +6654,7 @@ dependencies = [
  "sp-io",
  "sp-npos-elections",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "strum 0.24.1",
 ]
 
@@ -6650,7 +6669,7 @@ dependencies = [
  "parity-scale-codec",
  "sp-npos-elections",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6669,7 +6688,7 @@ dependencies = [
  "sp-npos-elections",
  "sp-runtime",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6688,7 +6707,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6711,7 +6730,7 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6727,7 +6746,7 @@ dependencies = [
  "scale-info",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6747,7 +6766,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6764,7 +6783,7 @@ dependencies = [
  "sp-io",
  "sp-keyring",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6781,7 +6800,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6799,7 +6818,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-weights",
 ]
 
@@ -6818,7 +6837,7 @@ dependencies = [
  "sp-io",
  "sp-mmr-primitives",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6834,7 +6853,7 @@ dependencies = [
  "scale-info",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6850,7 +6869,7 @@ dependencies = [
  "sp-arithmetic",
  "sp-core",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6868,7 +6887,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-tracing",
 ]
 
@@ -6889,7 +6908,7 @@ dependencies = [
  "sp-runtime",
  "sp-runtime-interface",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6900,7 +6919,7 @@ dependencies = [
  "pallet-nomination-pools",
  "parity-scale-codec",
  "sp-api",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6917,7 +6936,7 @@ dependencies = [
  "serde",
  "sp-runtime",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6941,7 +6960,7 @@ dependencies = [
  "scale-info",
  "sp-runtime",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6973,7 +6992,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -6988,7 +7007,7 @@ dependencies = [
  "scale-info",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7006,7 +7025,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7021,7 +7040,7 @@ dependencies = [
  "scale-info",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7040,7 +7059,7 @@ dependencies = [
  "sp-arithmetic",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7057,7 +7076,7 @@ dependencies = [
  "scale-info",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-weights",
 ]
 
@@ -7079,7 +7098,7 @@ dependencies = [
  "sp-session",
  "sp-staking",
  "sp-state-machine",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-trie",
 ]
 
@@ -7097,7 +7116,7 @@ dependencies = [
  "rand 0.8.5",
  "sp-runtime",
  "sp-session",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7115,7 +7134,7 @@ dependencies = [
  "sp-arithmetic",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7138,7 +7157,7 @@ dependencies = [
  "sp-io",
  "sp-runtime",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7184,7 +7203,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7199,7 +7218,7 @@ dependencies = [
  "scale-info",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7216,7 +7235,7 @@ dependencies = [
  "sp-inherents",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-storage",
  "sp-timestamp",
 ]
@@ -7237,7 +7256,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7253,7 +7272,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7298,7 +7317,7 @@ dependencies = [
  "scale-info",
  "serde",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7314,7 +7333,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7329,7 +7348,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7344,7 +7363,7 @@ dependencies = [
  "scale-info",
  "sp-api",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7363,7 +7382,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "staging-xcm",
  "staging-xcm-executor",
 ]
@@ -7381,7 +7400,7 @@ dependencies = [
  "scale-info",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "staging-xcm",
  "staging-xcm-builder",
  "staging-xcm-executor",
@@ -7424,7 +7443,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -7537,7 +7556,7 @@ dependencies = [
  "sp-offchain",
  "sp-runtime",
  "sp-session",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-transaction-pool",
  "sp-version",
  "staging-xcm",
@@ -7562,7 +7581,7 @@ dependencies = [
  "memmap2",
  "parking_lot 0.12.1",
  "rand 0.8.5",
- "siphasher",
+ "siphasher 0.3.11",
  "snap",
 ]
 
@@ -8000,7 +8019,7 @@ dependencies = [
  "scale-info",
  "sp-core",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -8604,7 +8623,7 @@ dependencies = [
  "serde",
  "sp-core",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -8648,7 +8667,7 @@ dependencies = [
  "sp-keystore",
  "sp-runtime",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -8769,7 +8788,7 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-storage",
  "sp-transaction-pool",
  "sp-version",
@@ -8821,7 +8840,7 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "staging-xcm",
  "static_assertions",
 ]
@@ -8849,7 +8868,7 @@ dependencies = [
  "frame-benchmarking",
  "parity-scale-codec",
  "polkadot-primitives",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-tracing",
 ]
 
@@ -8893,7 +8912,7 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "staging-xcm",
  "staging-xcm-executor",
  "static_assertions",
@@ -9262,9 +9281,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.69"
+version = "1.0.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "134c189feb4956b20f6f547d2cf727d4c0fe06722b20a0eec87ed445a97f92da"
+checksum = "39278fbbf5fb4f646ce651690877f89d1c5811a3d4acb27700c1cb3cdb78fd3b"
 dependencies = [
  "unicode-ident",
 ]
@@ -9861,7 +9880,7 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-storage",
  "sp-transaction-pool",
  "sp-version",
@@ -10106,6 +10125,17 @@ checksum = "ac3ffab8f9715a0d455df4bbb9d21e91135aab3cd3ca187af0cd0c3c3f868fdc"
 dependencies = [
  "byteorder",
  "thiserror-core",
+ "twox-hash",
+]
+
+[[package]]
+name = "ruzstd"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58c4eb8a81997cf040a091d1f7e1938aeab6749d3a0dfa73af43cdc32393483d"
+dependencies = [
+ "byteorder",
+ "derive_more",
  "twox-hash",
 ]
 
@@ -11114,7 +11144,7 @@ dependencies = [
  "serde_json",
  "sp-core",
  "sp-io",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -11246,9 +11276,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7789f5728e4e954aaa20cadcc370b99096fb8645fca3c9333ace44bb18f30095"
+checksum = "7caaf753f8ed1ab4752c6afb20174f03598c664724e0e32628e161c21000ff76"
 dependencies = [
  "derive_more",
  "parity-scale-codec",
@@ -11261,9 +11291,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode-derive"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "27873eb6005868f8cc72dcfe109fae664cf51223d35387bc2f28be4c28d94c47"
+checksum = "d3475108a1b62c7efd1b5c65974f30109a598b2f45f23c9ae030acb9686966db"
 dependencies = [
  "darling 0.14.4",
  "proc-macro-crate",
@@ -11328,9 +11358,9 @@ dependencies = [
 
 [[package]]
 name = "scale-value"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6538d1cc1af9c0baf401c57da8a6d4730ef582db0d330d2efa56ec946b5b0283"
+checksum = "58223c7691bf0bd46b43c9aea6f0472d1067f378d574180232358d7c6e0a8089"
 dependencies = [
  "base58",
  "blake2",
@@ -11395,9 +11425,27 @@ dependencies = [
  "curve25519-dalek-ng",
  "merlin 3.0.0",
  "rand_core 0.6.4",
- "serde_bytes",
  "sha2 0.9.9",
  "subtle-ng",
+ "zeroize",
+]
+
+[[package]]
+name = "schnorrkel"
+version = "0.11.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8de18f6d8ba0aad7045f5feae07ec29899c1112584a38509a84ad7b04451eaa0"
+dependencies = [
+ "aead 0.5.2",
+ "arrayref",
+ "arrayvec 0.7.4",
+ "curve25519-dalek 4.1.1",
+ "getrandom_or_panic",
+ "merlin 3.0.0",
+ "rand_core 0.6.4",
+ "serde_bytes",
+ "sha2 0.10.8",
+ "subtle",
  "zeroize",
 ]
 
@@ -11484,11 +11532,11 @@ dependencies = [
 
 [[package]]
 name = "secp256k1"
-version = "0.27.0"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25996b82292a7a57ed3508f052cfff8640d38d32018784acd714758b43da9c8f"
+checksum = "2acea373acb8c21ecb5a23741452acd2593ed44ee3d343e72baaa143bc89d0d5"
 dependencies = [
- "secp256k1-sys 0.8.1",
+ "secp256k1-sys 0.9.1",
 ]
 
 [[package]]
@@ -11502,9 +11550,9 @@ dependencies = [
 
 [[package]]
 name = "secp256k1-sys"
-version = "0.8.1"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70a129b9e9efbfb223753b9163c4ab3b13cff7fd9c7f010fbac25ab4099fa07e"
+checksum = "4dd97a086ec737e30053fd5c46f097465d25bb81dd3608825f65298c4c98be83"
 dependencies = [
  "cc",
 ]
@@ -11748,6 +11796,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
 
 [[package]]
+name = "siphasher"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54ac45299ccbd390721be55b412d41931911f654fa99e2cb8bfb57184b2061fe"
+
+[[package]]
 name = "slab"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11771,7 +11825,7 @@ dependencies = [
  "parity-scale-codec",
  "paste",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -11844,13 +11898,13 @@ dependencies = [
  "poly1305",
  "rand 0.8.5",
  "rand_chacha 0.3.1",
- "ruzstd",
+ "ruzstd 0.4.0",
  "schnorrkel 0.10.2",
  "serde",
  "serde_json",
  "sha2 0.10.8",
  "sha3",
- "siphasher",
+ "siphasher 0.3.11",
  "slab",
  "smallvec",
  "soketto",
@@ -11862,12 +11916,12 @@ dependencies = [
 
 [[package]]
 name = "smoldot"
-version = "0.12.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4388a7690d9f76320dedc7f97f213160fbe4fb4a38a8b4cc8bb96e0fd05e0971"
+checksum = "eca99148e026936bbc444c3708748207033968e4ef1c33bfc885660ae4d44d21"
 dependencies = [
  "arrayvec 0.7.4",
- "async-lock 2.8.0",
+ "async-lock 3.1.2",
  "atomic-take",
  "base64 0.21.5",
  "bip39",
@@ -11878,14 +11932,15 @@ dependencies = [
  "derive_more",
  "ed25519-zebra 4.0.3",
  "either",
- "event-listener 2.5.3",
+ "event-listener 3.1.0",
  "fnv",
- "futures-lite 1.13.0",
+ "futures-lite 2.0.1",
  "futures-util",
  "hashbrown 0.14.2",
  "hex",
  "hmac 0.12.1",
  "itertools 0.11.0",
+ "libm",
  "libsecp256k1",
  "merlin 3.0.0",
  "no-std-net",
@@ -11898,13 +11953,13 @@ dependencies = [
  "poly1305",
  "rand 0.8.5",
  "rand_chacha 0.3.1",
- "ruzstd",
- "schnorrkel 0.10.2",
+ "ruzstd 0.5.0",
+ "schnorrkel 0.11.4",
  "serde",
  "serde_json",
  "sha2 0.10.8",
  "sha3",
- "siphasher",
+ "siphasher 1.0.0",
  "slab",
  "smallvec",
  "soketto",
@@ -11943,7 +11998,7 @@ dependencies = [
  "rand_chacha 0.3.1",
  "serde",
  "serde_json",
- "siphasher",
+ "siphasher 0.3.11",
  "slab",
  "smol",
  "smoldot 0.11.0",
@@ -11952,26 +12007,26 @@ dependencies = [
 
 [[package]]
 name = "smoldot-light"
-version = "0.10.0"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bea3d21923cbdb1362205ff8b2adb5da67e6b81b34c4bba1baaef9b88cbd83b8"
+checksum = "0e6f1898682b618b81570047b9d870b3faaff6ae1891b468eddd94d7f903c2fe"
 dependencies = [
- "async-channel 1.9.0",
- "async-lock 2.8.0",
+ "async-channel 2.1.1",
+ "async-lock 3.1.2",
  "base64 0.21.5",
  "blake2-rfc",
  "derive_more",
  "either",
- "event-listener 2.5.3",
+ "event-listener 3.1.0",
  "fnv",
  "futures-channel",
- "futures-lite 1.13.0",
+ "futures-lite 2.0.1",
  "futures-util",
  "hashbrown 0.14.2",
  "hex",
  "itertools 0.11.0",
  "log",
- "lru 0.11.1",
+ "lru 0.12.1",
  "no-std-net",
  "parking_lot 0.12.1",
  "pin-project",
@@ -11979,10 +12034,10 @@ dependencies = [
  "rand_chacha 0.3.1",
  "serde",
  "serde_json",
- "siphasher",
+ "siphasher 1.0.0",
  "slab",
  "smol",
- "smoldot 0.12.0",
+ "smoldot 0.14.0",
  "zeroize",
 ]
 
@@ -12061,7 +12116,7 @@ dependencies = [
  "sp-metadata-ir",
  "sp-runtime",
  "sp-state-machine",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-trie",
  "sp-version",
  "thiserror",
@@ -12091,7 +12146,7 @@ dependencies = [
  "serde",
  "sp-core",
  "sp-io",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -12104,7 +12159,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "serde",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "static_assertions",
 ]
 
@@ -12118,7 +12173,7 @@ dependencies = [
  "sp-api",
  "sp-application-crypto",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -12129,7 +12184,7 @@ dependencies = [
  "sp-api",
  "sp-inherents",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -12178,7 +12233,7 @@ dependencies = [
  "sp-consensus-slots",
  "sp-inherents",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-timestamp",
 ]
 
@@ -12197,7 +12252,7 @@ dependencies = [
  "sp-core",
  "sp-inherents",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-timestamp",
 ]
 
@@ -12216,7 +12271,7 @@ dependencies = [
  "sp-io",
  "sp-mmr-primitives",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "strum 0.24.1",
 ]
 
@@ -12235,7 +12290,7 @@ dependencies = [
  "sp-core",
  "sp-keystore",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -12246,7 +12301,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "serde",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-timestamp",
 ]
 
@@ -12283,11 +12338,11 @@ dependencies = [
  "secp256k1 0.24.3",
  "secrecy",
  "serde",
- "sp-core-hashing 9.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-core-hashing 9.0.0",
  "sp-debug-derive",
  "sp-externalities",
  "sp-runtime-interface",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-storage",
  "ss58-registry",
  "substrate-bip39",
@@ -12300,22 +12355,21 @@ dependencies = [
 [[package]]
 name = "sp-core-hashing"
 version = "9.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ee599a8399448e65197f9a6cee338ad192e9023e35e31f22382964c3c174c68"
+source = "git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk#8786f41e218176e8e6aa115d735f7a01474688d3"
 dependencies = [
  "blake2b_simd",
  "byteorder",
  "digest 0.10.7",
  "sha2 0.10.8",
  "sha3",
- "sp-std 8.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "twox-hash",
 ]
 
 [[package]]
 name = "sp-core-hashing"
-version = "9.0.0"
-source = "git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk#8786f41e218176e8e6aa115d735f7a01474688d3"
+version = "13.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb8524f01591ee58b46cd83c9dbc0fcffd2fd730dabec4f59326cd58a00f17e2"
 dependencies = [
  "blake2b_simd",
  "byteorder",
@@ -12331,7 +12385,7 @@ version = "9.0.0"
 source = "git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk#8786f41e218176e8e6aa115d735f7a01474688d3"
 dependencies = [
  "quote",
- "sp-core-hashing 9.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-core-hashing 9.0.0",
  "syn 2.0.39",
 ]
 
@@ -12361,7 +12415,7 @@ source = "git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk#
 dependencies = [
  "environmental",
  "parity-scale-codec",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-storage",
 ]
 
@@ -12373,7 +12427,7 @@ dependencies = [
  "serde_json",
  "sp-api",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -12386,7 +12440,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "thiserror",
 ]
 
@@ -12407,7 +12461,7 @@ dependencies = [
  "sp-keystore",
  "sp-runtime-interface",
  "sp-state-machine",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-tracing",
  "sp-trie",
  "tracing",
@@ -12454,7 +12508,7 @@ dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
  "scale-info",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -12471,7 +12525,7 @@ dependencies = [
  "sp-core",
  "sp-debug-derive",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "thiserror",
 ]
 
@@ -12486,7 +12540,7 @@ dependencies = [
  "sp-arithmetic",
  "sp-core",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -12537,7 +12591,7 @@ dependencies = [
  "sp-arithmetic",
  "sp-core",
  "sp-io",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-weights",
 ]
 
@@ -12552,7 +12606,7 @@ dependencies = [
  "primitive-types",
  "sp-externalities",
  "sp-runtime-interface-proc-macro",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-storage",
  "sp-tracing",
  "sp-wasm-interface",
@@ -12583,7 +12637,7 @@ dependencies = [
  "sp-keystore",
  "sp-runtime",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -12597,7 +12651,7 @@ dependencies = [
  "serde",
  "sp-core",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -12614,7 +12668,7 @@ dependencies = [
  "sp-core",
  "sp-externalities",
  "sp-panic-handler",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-trie",
  "thiserror",
  "tracing",
@@ -12640,16 +12694,10 @@ dependencies = [
  "sp-externalities",
  "sp-runtime",
  "sp-runtime-interface",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "thiserror",
  "x25519-dalek 2.0.0",
 ]
-
-[[package]]
-name = "sp-std"
-version = "8.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53458e3c57df53698b3401ec0934bea8e8cfce034816873c0b0abbd83d7bac0d"
 
 [[package]]
 name = "sp-std"
@@ -12666,7 +12714,7 @@ dependencies = [
  "ref-cast",
  "serde",
  "sp-debug-derive",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -12678,7 +12726,7 @@ dependencies = [
  "parity-scale-codec",
  "sp-inherents",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "thiserror",
 ]
 
@@ -12688,7 +12736,7 @@ version = "10.0.0"
 source = "git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk#8786f41e218176e8e6aa115d735f7a01474688d3"
 dependencies = [
  "parity-scale-codec",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "tracing",
  "tracing-core",
  "tracing-subscriber",
@@ -12714,7 +12762,7 @@ dependencies = [
  "sp-core",
  "sp-inherents",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-trie",
 ]
 
@@ -12734,7 +12782,7 @@ dependencies = [
  "scale-info",
  "schnellru",
  "sp-core",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "thiserror",
  "tracing",
  "trie-db",
@@ -12753,7 +12801,7 @@ dependencies = [
  "serde",
  "sp-core-hashing-proc-macro",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-version-proc-macro",
  "thiserror",
 ]
@@ -12778,7 +12826,7 @@ dependencies = [
  "impl-trait-for-tuples",
  "log",
  "parity-scale-codec",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "wasmtime",
 ]
 
@@ -12794,7 +12842,7 @@ dependencies = [
  "sp-arithmetic",
  "sp-core",
  "sp-debug-derive",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
 ]
 
 [[package]]
@@ -12956,7 +13004,7 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-storage",
  "sp-transaction-pool",
  "sp-version",
@@ -13000,7 +13048,7 @@ dependencies = [
  "sp-arithmetic",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-weights",
  "staging-xcm",
  "staging-xcm-executor",
@@ -13021,7 +13069,7 @@ dependencies = [
  "sp-core",
  "sp-io",
  "sp-runtime",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-weights",
  "staging-xcm",
 ]
@@ -13246,8 +13294,8 @@ checksum = "734676eb262c623cec13c3155096e08d1f8f29adce39ba17948b18dad1e54142"
 
 [[package]]
 name = "subxt"
-version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+version = "0.33.0"
+source = "git+https://github.com/paritytech/subxt?branch=master#2717609acf0f6603708f53ea04dc2ce31340efeb"
 dependencies = [
  "async-trait",
  "base58",
@@ -13268,7 +13316,7 @@ dependencies = [
  "scale-value",
  "serde",
  "serde_json",
- "sp-core-hashing 9.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sp-core-hashing 13.0.0",
  "subxt-lightclient",
  "subxt-macro",
  "subxt-metadata",
@@ -13278,8 +13326,8 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#d44941fb1bdb1b46ef8537dd7511654facc3f763"
+version = "0.33.0"
+source = "git+https://github.com/paritytech/subxt?branch=master#2717609acf0f6603708f53ea04dc2ce31340efeb"
 dependencies = [
  "frame-metadata 16.0.0",
  "heck",
@@ -13297,14 +13345,14 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#24e19b1e0feae0fea5c41d48e670ca9293da1c36"
+version = "0.33.0"
+source = "git+https://github.com/paritytech/subxt?branch=master#2717609acf0f6603708f53ea04dc2ce31340efeb"
 dependencies = [
  "futures",
  "futures-util",
  "serde",
  "serde_json",
- "smoldot-light 0.10.0",
+ "smoldot-light 0.12.0",
  "thiserror",
  "tokio",
  "tokio-stream",
@@ -13313,8 +13361,8 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#24e19b1e0feae0fea5c41d48e670ca9293da1c36"
+version = "0.33.0"
+source = "git+https://github.com/paritytech/subxt?branch=master#2717609acf0f6603708f53ea04dc2ce31340efeb"
 dependencies = [
  "darling 0.20.3",
  "parity-scale-codec",
@@ -13325,20 +13373,20 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#24e19b1e0feae0fea5c41d48e670ca9293da1c36"
+version = "0.33.0"
+source = "git+https://github.com/paritytech/subxt?branch=master#2717609acf0f6603708f53ea04dc2ce31340efeb"
 dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
  "scale-info",
- "sp-core-hashing 9.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sp-core-hashing 13.0.0",
  "thiserror",
 ]
 
 [[package]]
 name = "subxt-signer"
-version = "0.32.1"
-source = "git+https://github.com/paritytech/subxt?branch=master#24e19b1e0feae0fea5c41d48e670ca9293da1c36"
+version = "0.33.0"
+source = "git+https://github.com/paritytech/subxt?branch=master#2717609acf0f6603708f53ea04dc2ce31340efeb"
 dependencies = [
  "bip39",
  "hex",
@@ -13346,11 +13394,11 @@ dependencies = [
  "parity-scale-codec",
  "pbkdf2 0.12.2",
  "regex",
- "schnorrkel 0.10.2",
- "secp256k1 0.27.0",
+ "schnorrkel 0.11.4",
+ "secp256k1 0.28.0",
  "secrecy",
  "sha2 0.10.8",
- "sp-core-hashing 9.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sp-core-hashing 13.0.0",
  "subxt",
  "thiserror",
  "zeroize",
@@ -14052,7 +14100,7 @@ checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
  "cfg-if",
  "digest 0.10.7",
- "rand 0.8.5",
+ "rand 0.7.3",
  "static_assertions",
 ]
 
@@ -14969,7 +15017,7 @@ dependencies = [
  "sp-runtime",
  "sp-session",
  "sp-staking",
- "sp-std 8.0.0 (git+https://github.com/coax1d/polkadot-sdk?branch=xcmp_customized_sdk)",
+ "sp-std",
  "sp-storage",
  "sp-transaction-pool",
  "sp-version",
