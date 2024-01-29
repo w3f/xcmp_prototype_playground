@@ -15410,6 +15410,7 @@ dependencies = [
  "hex",
  "hex-literal",
  "jsonrpsee 0.16.3",
+ "lazy_static",
  "log",
  "mmr-rpc",
  "parachain-template-runtime",
