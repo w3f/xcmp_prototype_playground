@@ -7,7 +7,7 @@ license = "Apache-2.0"
 description = "Relayer for XCMP"
 
 [dependencies]
-runtime = { path = "../runtime", package = "parachain-template-runtime"}
+runtime = { path = "../runtime", package = "parachain-template-runtime" }
 
 serde_json = { workspace = true }
 parity-scale-codec = { workspace = true }
