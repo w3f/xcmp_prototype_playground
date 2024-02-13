@@ -28,6 +28,11 @@ use subxt_signer::{sr25519::dev, ecdsa::dev::alice};
 #[subxt::subxt(runtime_metadata_url = "ws://localhost:54887")]
 pub mod polkadot { }
 
+use polkadot::runtime_types::{
+	pallet_xcmp_message_stuffer::XcmpProof,
+	sp_mmr_primitives::Proof as XcmpProofType,
+};
+
 /// The default endpoints for each
 const DEFAULT_ENDPOINT_PARA_SENDER: &str = "ws://localhost:54888";
 const DEFAULT_RPC_ENDPOINT_PARA_SENDER: &str = "http://localhost:54888";
@@ -166,7 +171,7 @@ async fn generate_stage_1_proof(client: &MultiClient) -> anyhow::Result<()> {
 	let proof = generate_mmr_proof(&client, relay_block_num.into(), None).await?;
 
 	// 3.) Send transaction to chain for proof
-
+	submit_big_proof(&client, proof)?;
 
 	Ok(())
 }
@@ -194,38 +199,43 @@ async fn update_root(client: &MultiClient, root: H256) -> anyhow::Result<()> {
 }
 
 async fn submit_big_proof(client: &MultiClient, proof: LeavesProof<H256>) -> anyhow::Result<()> {
-	// let signer = dev::charlie();
-	// let leaves = Decode::decode(&mut &proof.leaves.0[..])
-	// 		.map_err(|e| anyhow::Error::new(e))?;
-	// let decoded_proof = Decode::decode(&mut &proof.proof.0[..])
-	// 		.map_err(|e| anyhow::Error::new(e))?;
+	let signer = dev::charlie();
+	let leaves = Decode::decode(&mut &proof.leaves.0[..])
+			.map_err(|e| anyhow::Error::new(e))?;
+	let decoded_proof: XcmpProofType<H256> = Decode::decode(&mut &proof.proof.0[..])
+			.map_err(|e| anyhow::Error::new(e))?;
 
 	// TODO: Need to find how to get this type from subxts metadata
-	// let xcmp_proof = XcmpProof {
-	// 	stage_1: (decoded_proof.clone(), leaves.clone()),
-	// 	stage_2: (),
-	// 	stage_3: (),
-	// 	// TODO: Remove. For now just testing stage 1 can pass
-	// 	stage_4: (decoded_proof, leaves),
-	// };
+	let dummy_proof: XcmpProofType<H256> = XcmpProofType::<H256> {
+		leaf_indices: Vec::new(),
+		leaf_count: 0u64,
+		items: Vec::new(),
+	};
+	let xcmp_proof = XcmpProof {
+		stage_1: (decoded_proof, leaves),
+		stage_2: (),
+		stage_3: (),
+		// TODO: Remove. For now just testing stage 1 can pass
+		stage_4: (dummy_proof, Vec::new()),
+	};
 
-	// let tx = crate::polkadot::tx().msg_stuffer_para_a().submit_big_proof(xcmp_proof.into());
-	// let tx_progress = client.subxt_client.tx().sign_and_submit_then_watch_default(&tx, &signer).await?;
+	let tx = crate::polkadot::tx().msg_stuffer_para_a().submit_big_proof(xcmp_proof);
+	let tx_progress = client.subxt_client.tx().sign_and_submit_then_watch_default(&tx, &signer).await?;
 
-	// let hash_tx = tx_progress.extrinsic_hash();
-	// log::info!("Got After submitting submit_BIG_xcmp_proof");
-	// match tx_progress.wait_for_in_block().await {
-	// 	Ok(tx_in_block) => {
-	// 		match tx_in_block.wait_for_success().await {
-	// 			Ok(events) => { log::info!("Got the tx in a block and it succeeded! {:?}", events); },
-	// 			Err(e) => { log::info!("Was not successful extrinsic ERROR:: {:?}", e); }
-	// 		}
-	// 	},
-	// 	Err(e) => {
-	// 		log::info!("Tx didnt get in a block error {:?}", e);
-	// 	}
-	// }
-	// log::info!("Hash of BIG_xcmp_proof_submission: {:?}", hash_tx);
+	let hash_tx = tx_progress.extrinsic_hash();
+	log::info!("Got After submitting submit_BIG_xcmp_proof");
+	match tx_progress.wait_for_in_block().await {
+		Ok(tx_in_block) => {
+			match tx_in_block.wait_for_success().await {
+				Ok(events) => { log::info!("Got the tx in a block and it succeeded! {:?}", events); },
+				Err(e) => { log::info!("Was not successful extrinsic ERROR:: {:?}", e); }
+			}
+		},
+		Err(e) => {
+			log::info!("Tx didnt get in a block error {:?}", e);
+		}
+	}
+	log::info!("Hash of BIG_xcmp_proof_submission: {:?}", hash_tx);
 
 	Ok(())
 }
