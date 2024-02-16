@@ -121,9 +121,22 @@ async fn collect_relay_beefy_roots(client: &MultiClient) -> anyhow::Result<()> {
 		while let Some(block) = blocks_sub.next().await {
 			let block = block?;
 
-			let params = rpc_params![Option::<Hash>::None];
-			let request: Option<Hash> = client.rpc_client.request("mmr_root", params).await?;
+			let params = rpc_params![Option::<Hash>::None, 0u64];
+			log::info!("Before relay beefy root request");
+			let request: Option<Hash> = match client.rpc_client.request("mmr_root", params).await {
+				Ok(opt) => {
+					log::info!("Relay MMR root request success");
+					opt
+				},
+				Err(e) => {
+					log::info!("Relay MMR root request failed with {:?}", e);
+					None
+				}
+			};
+			// let request: Option<Hash> = client.rpc_client.request("mmr_root", params).await?;
+			log::info!("After relay beefy root request");
 			let root = request.ok_or(RelayerError::Default)?;
+			log::info!("Got Current Beefy Root from Relaychain {:?}", root);
 
 			match BEEFY_MMR_MAP.try_lock() {
 				Ok(mut s) => {
@@ -144,34 +157,62 @@ async fn collect_relay_beefy_roots(client: &MultiClient) -> anyhow::Result<()> {
 	Ok(())
 }
 
-async fn generate_stage_1_proof(client: &MultiClient) -> anyhow::Result<()> {
+async fn generate_stage_1_proof(client: &MultiClient, block_num: u64) -> anyhow::Result<()> {
+	log::info!("Entered generate_stage_1_proof");
 	let client = client.clone();
 	// 1.) For each para block on receiver get the current Beefy Root on chain via RPC or subxt
+	let beefy_api_call = polkadot::apis().messaging_api().get_current_beefy_root();
 	let beefy_root = match client.subxt_client
 		.runtime_api()
 		.at_latest()
 		.await?
-		.call_raw("get_current_beefy_root", None)
+		.call(beefy_api_call)
 		.await {
-			Ok(Some(root)) => root,
-			Ok(None) => H256::zero(),
-			Err(e) => H256::zero()
+			Ok(root) => {
+				log::info!("Got root from `get_current_beefy_root` {}", root);
+				root
+			},
+			// Ok(None) => {
+			// 	log::info!("Got none from `get_current_beefy_root`");
+			// 	H256::zero()
+			// },
+			Err(e) => {
+				log::info!("Got error from trying to call `get_current_beefy_root` {}", e);
+				H256::zero()
+			}
 		};
+	log::info!("Beefy Root obtained in generate_stage_1_proof: {}", beefy_root);
+	// let _ = match BEEFY_MMR_MAP.try_lock() {
+	// 	Ok(s) => {
+	// 		log::info!("Current map is {:?}", s);
+	// 	},
+	// 	Err(_) => {
+	// 		log::info!("Could not lock map");
+	// 	}
+	// };
 	// 2.) Then call RPC to generate mmr_proof for Relay block number corresponding to this Beefy Root
 	let relay_block_num = match BEEFY_MMR_MAP.try_lock() {
 		Ok(s) => {
 			s.get(&beefy_root).cloned()
 		},
 		Err(_) => {
-			log::error!("Could not lock BEEFY_MMR_MAP for reading");
+			log::info!("Could not lock BEEFY_MMR_MAP for reading");
 			None
 		}
-	}.ok_or(RelayerError::Default)?;
+	}.ok_or_else(|| {
+			log::info!("Could not read relay_block_num from BEEFY_MMR_MAP");
+			RelayerError::Default
+		}
+	)?;
 
-	let proof = generate_mmr_proof(&client, relay_block_num.into(), None).await?;
+	log::info!("Got Relayblock Num {} for Beefy Root {}", relay_block_num, beefy_root);
+
+	// This needs to be a specific parablock num from sender not relay..
+	let proof = generate_mmr_proof(&client, block_num.into(), Some(0u64)).await?;
 
 	// 3.) Send transaction to chain for proof
-	submit_big_proof(&client, proof)?;
+	log::info!("calling submit_big_proof");
+	submit_big_proof(&client, proof).await?;
 
 	Ok(())
 }
@@ -218,6 +259,8 @@ async fn submit_big_proof(client: &MultiClient, proof: LeavesProof<H256>) -> any
 		// TODO: Remove. For now just testing stage 1 can pass
 		stage_4: (dummy_proof, Vec::new()),
 	};
+
+	log::info!("Constructed Dummy Proof and XCMP Proof");
 
 	let tx = crate::polkadot::tx().msg_stuffer_para_a().submit_big_proof(xcmp_proof);
 	let tx_progress = client.subxt_client.tx().sign_and_submit_then_watch_default(&tx, &signer).await?;
@@ -313,6 +356,8 @@ async fn get_proof_and_verify(client: &MultiClient) -> anyhow::Result<()> {
 				Err(e) => format!("Cant update root on chain yet {:?}", e),
 			};
 			log::info!("{}", update_root_string);
+
+			let _ = generate_stage_1_proof(&client, block.number()).await;
 
 			if onchain_root == root {
 				log::info!("onchain_root matches!!! submitting now!!");
@@ -431,6 +476,7 @@ async fn generate_mmr_proof(
 	block_num: u64,
 	channel_id: Option<u64>
 ) -> anyhow::Result<LeavesProof<H256>> {
+	log::info!("Entering generate_mmr_proof block_num {}", block_num);
 	let block = client.subxt_client.blocks().at_latest().await?;
 
 	let mut params = jsonrpsee::core::params::ArrayParams::new();
@@ -441,7 +487,14 @@ async fn generate_mmr_proof(
 		params = rpc_params![vec![block_num], Option::<BlockNumber>::None, Option::<Hash>::None];
 	}
 
-	let request: Option<LeavesProof<H256>> = client.rpc_client.request("mmr_generateProof", params).await?;
+
+	let request: Option<LeavesProof<H256>> = match client.rpc_client.request("mmr_generateProof", params).await {
+		Ok(opt_proof) => {
+			log::info!("Got proof from request.. block_num {}", block_num);
+		},
+
+	}
+	// let request: Option<LeavesProof<H256>> = client.rpc_client.request("mmr_generateProof", params).await?;
 	let proof = request.ok_or(RelayerError::Default)?;
 	log::info!("Proof obtained:: {:?}", proof);
 	Ok(proof)

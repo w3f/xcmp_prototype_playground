@@ -727,7 +727,8 @@ impl_runtime_apis! {
 	impl cumulus_pallet_parachain_system::MessagingApi<Block, ParachainSystem> for Runtime {
 		fn get_current_beefy_root() -> <ParachainSystem as GetBeefyRoot>::Root {
 			// TODO: For now if there is no root just return H256::zero() Remove! for better error handling
-			<ParachainSystem as GetBeefyRoot>::get_root().unwrap_or(Default::default())
+			<ParachainSystem as GetBeefyRoot>::get_root().unwrap_or(
+				sp_core::H256::from(&[1; 32]))
 		}
 	}
 
