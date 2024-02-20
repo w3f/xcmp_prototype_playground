@@ -523,6 +523,7 @@ parameter_types! {
 	pub LeafVersion: MmrLeafVersion = MmrLeafVersion::new(0, 0);
 
 	pub ParaAIdentifier: ParaId = ParaId::from(1u32);
+	pub MaxBeefyRootsKept: u32 = 64000u32;
 }
 
 type ParaAChannel = pallet_xcmp_message_stuffer::Instance1;
@@ -533,6 +534,7 @@ impl pallet_xcmp_message_stuffer::Config<ParaAChannel> for Runtime {
 	type XcmpDataProvider = XcmpDataProvider;
 	type RelayerOrigin = EnsureRoot<AccountId>;
 	type BeefyRootProvider = ParachainSystem;
+	type MaxBeefyRootsKept = MaxBeefyRootsKept;
 }
 
 type ParaAMmr = pallet_mmr::Instance1;
@@ -556,6 +558,7 @@ impl pallet_xcmp_message_stuffer::Config<ParaBChannel> for Runtime {
 	type XcmpDataProvider = XcmpDataProvider;
 	type RelayerOrigin = EnsureRoot<AccountId>;
 	type BeefyRootProvider = ParachainSystem;
+	type MaxBeefyRootsKept = MaxBeefyRootsKept;
 }
 
 type ParaBMmr = pallet_mmr::Instance2;

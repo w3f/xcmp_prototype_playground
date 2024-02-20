@@ -25,6 +25,7 @@ sp-consensus-beefy = { workspace = true, default-features = false }
 sp-core = { workspace = true, default-features = false }
 sp-runtime = { workspace = true, default-features = false }
 sp-mmr-primitives = { workspace = true }
+sp-api = { workspace = true }
 
 # Cumulus
 cumulus-primitives-core = { workspace = true, default-features = false }

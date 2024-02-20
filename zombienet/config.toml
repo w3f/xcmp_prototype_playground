@@ -1,6 +1,6 @@
 [relaychain]
 default_command = "./bin/polkadot"
-default_args = [ "-lparachain=debug" ]
+default_args = [ "-lparachain=debug --enable-offchain-indexing true" ]
 
 chain = "rococo-local"
 
