@@ -7,7 +7,7 @@ license = "Apache-2.0"
 description = "Relayer for XCMP"
 
 [dependencies]
-runtime = { path = "../runtime", package = "parachain-template-runtime"}
+runtime = { path = "../runtime", package = "parachain-template-runtime" }
 
 serde_json = { workspace = true }
 parity-scale-codec = { workspace = true }
@@ -20,6 +20,7 @@ directories = { workspace = true }
 futures = { workspace = true }
 env_logger = { workspace = true }
 log = { workspace = true }
+lazy_static = { workspace = true }
 
 sp-runtime = { workspace = true }
 sp-core = { workspace = true }

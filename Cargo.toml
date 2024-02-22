@@ -21,6 +21,7 @@ parity-scale-codec = { version = "3.0.0", default-features = false, features = [
 parity-util-mem = "0.12.0"
 scale-info = { version = "2.2.0", default-features = false, features = ["derive"] }
 serde = "1.0"
+lazy_static = "1.4"
 
 # Procedural macro dependencies
 proc-macro2 = "1.0.67"
@@ -87,8 +88,8 @@ sp-timestamp = { default_features = false, git = "https://github.com/coax1d/polk
 sp-transaction-pool = { default_features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
 sp-version = { default-features = false, git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }
 
-subxt = { git = 'https://github.com/paritytech/subxt', branch = "master" }
-subxt-signer = { git = 'https://github.com/paritytech/subxt', branch = "master", features = ["subxt"] }
+subxt = { git = 'https://github.com/paritytech/subxt', rev = "d44941fb1bdb1b46ef8537dd7511654facc3f763" }
+subxt-signer = { git = 'https://github.com/paritytech/subxt', rev = "d44941fb1bdb1b46ef8537dd7511654facc3f763", features = ["subxt"] }
 
 # Node Deps
 frame-benchmarking-cli = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk" }

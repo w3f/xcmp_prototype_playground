@@ -4,7 +4,7 @@ pub use pallet::*;
 use pallet_mmr::{LeafDataProvider, ParentNumberAndHash, verify_leaves_proof};
 use sp_consensus_beefy::mmr::MmrLeafVersion;
 
-use frame_support::{dispatch::{DispatchResult}, pallet_prelude::*,};
+use frame_support::{dispatch::{DispatchResult}, pallet_prelude::*, WeakBoundedVec};
 use frame_system::pallet_prelude::*;
 use cumulus_primitives_core::{ParaId, GetBeefyRoot};
 use sp_runtime::traits::{Hash as HashT, Keccak256};
@@ -34,6 +34,18 @@ type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMess
 type MmrProof = Proof<H256>;
 type LeafOf<T, I> = <crate::Pallet<T, I> as LeafDataProvider>::LeafData;
 type ChannelId = u64;
+type BinaryMerkleProof = ();
+
+
+#[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
+pub struct XcmpProof {
+	// TODO: Probably should rename each of these stages to some fancy name
+	// TODO: Remove tuples
+	pub stage_1: (MmrProof, Vec<EncodableOpaqueLeaf>),
+	pub stage_2: BinaryMerkleProof,
+	pub stage_3: BinaryMerkleProof,
+	pub stage_4: (MmrProof, Vec<EncodableOpaqueLeaf>),
+}
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -48,6 +60,7 @@ pub mod pallet {
 		type RelayerOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 		/// This is used when updating the current `XcmpChannelRoots`
 		type BeefyRootProvider: GetBeefyRoot;
+		type MaxBeefyRootsKept: Get<u32>;
 	}
 
 	#[pallet::pallet]
@@ -57,6 +70,14 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn xcmp_channel_roots)]
 	pub type XcmpChannelRoots<T: Config<I>, I: 'static = ()> = StorageMap<_, Identity, ChannelId, H256, OptionQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn seen_beefy_roots)]
+	pub type SeenBeefyRoots<T: Config<I>, I: 'static = ()> = StorageMap<_, Identity, H256, BlockNumberFor<T>, OptionQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn seen_beefy_roots_order)]
+	pub type SeenBeefyRootsOrder<T: Config<I>, I: 'static = ()> = StorageValue<_, WeakBoundedVec<H256, T::MaxBeefyRootsKept>, ValueQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -77,13 +98,30 @@ pub mod pallet {
 		XcmpProofAccepted,
 		XcmpProofLeavesNotValid,
 		XcmpNoChannelRootForChannelId,
+		XcmpBeefyRootTargetedNeverSeen,
+	}
+
+	#[pallet::hooks]
+	impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
+		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+			// TODO: Remove Temporary.. change from unwrapping default..
+			let beefy_root = T::BeefyRootProvider::get_root().unwrap_or_default();
+			SeenBeefyRoots::<T, I>::insert(&beefy_root.clone().into(), n);
+
+			let mut order = SeenBeefyRootsOrder::<T, I>::get().into_inner();
+			order.push(beefy_root.into());
+
+			let item = WeakBoundedVec::force_from(order, None);
+			SeenBeefyRootsOrder::<T, I>::put(item);
+
+			T::DbWeight::get().writes(3)
+		}
 	}
 
 	#[pallet::call]
 	impl<T: Config<I>, I: 'static> Pallet<T, I> {
 
-		// TODO: Retrieve latest valid MmrChannelRoots from Relaychain (Perhaps this is done in on_initialize)
-
+		// TODO: This will
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn submit_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof, leaves: Vec<EncodableOpaqueLeaf>, channel_id: u64) -> DispatchResult {
@@ -138,6 +176,101 @@ pub mod pallet {
 				"Updated root for channel_id: {:?}, root: {:?}",
 				channel_id, root
 			);
+			Ok(())
+		}
+
+		/// For now there is just one leaf in each membership proof
+		/// TODO: Change to support multiple leaves..
+		#[pallet::call_index(2)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn submit_big_proof(origin: OriginFor<T>, xcmp_proof: XcmpProof, beefy_root_targeted: H256) -> DispatchResult {
+			ensure_signed(origin)?;
+
+			log::info!(
+				target: LOG_TARGET,
+				"Called submit big proof, targeting BEEFY_ROOT {:?}",
+				beefy_root_targeted
+			);
+
+			if !SeenBeefyRoots::<T, I>::contains_key(&beefy_root_targeted) {
+				return Err(Error::<T, I>::XcmpBeefyRootTargetedNeverSeen.into())
+			}
+
+			// Verify stage 1 via grabbing Beefy Root and checking against stage 1
+			let (stage_1_proof, stage_1_leaves) = xcmp_proof.stage_1;
+
+			let nodes: Vec<_> = stage_1_leaves
+				.clone()
+				.into_iter()
+				.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
+				.collect();
+
+			// TODO: Replace this error with an Error that specifies stage_1 of proof verification failed
+			verify_leaves_proof(beefy_root_targeted.into(), nodes, stage_1_proof).map_err(|_| Error::<T, I>::XcmpProofNotValid)?;
+
+			log::info!(
+				target: LOG_TARGET,
+				"Verified Stage 1 Big XCMP Proof Successfully!!!",
+			);
+
+			// Verify stage 2..
+			// grab ParaHeader root from stage_1_proof
+			// let para_header_root = Decode::decode(stage_1_leaves)
+			// let (stage_2_proof, stage_2_leaves) = xcmp_proof.stage_2;
+
+			// These are different leaves they arent the MmrLeaves they are Binary Merkle Leaves
+			// This will be a bit different but same rough idea as the Mmr
+			// let nodes: Vec<_> = stage_2_leaves
+			// 	.clone()
+			// 	.into_iter()
+			// 	.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
+			// 	.collect();
+
+			// binary merkle proof verification of para_header_root against stage_2_proof(leaves are (para_id, para_header))
+			// verify_proof(root, nodes, stage_2_proof);
+
+			// let (para_id, para_header) = Decode::decode(stage_2_leaves);
+			// Check channels storage to make sure this ParaId is someone that we support
+			// if !XcmpChannels::<T>::exists(para_id) {
+					// return Error::<T>::XcmpProofNoChannelWithSender
+			// }
+
+			// Verify stage 3..
+			// extract xcmp_root from paraheader..
+			// let xcmp_root = extract(para_header)
+			// let (stage_3_proof, stage_3_leaves) = xcmp_proof.stage_3;
+
+			// These are different leaves they arent the MmrLeaves they are Binary Merkle Leaves
+			// This will be a bit different but same rough idea as the Mmr
+			// let nodes: Vec<_> = stage_3_leaves
+			// 	.clone()
+			// 	.into_iter()
+			// 	.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
+			// 	.collect();
+
+			// binary merkle proof verification of xcmp_root against stage_3_proof(mmr_root_from_sender)
+			// verify_proof(xcmp_root, nodes, stage_3_proof)?;
+
+			// Verify stage 4..
+			// let mmr_root = Decode::decode(stage_3_leaves);
+			// let (stage_4_proof, stage_4_leaves) = xcmp_proof.stage_4;
+
+			// let nodes: Vec<_> = stage_4_leaves
+			// 	.clone()
+			// 	.into_iter()
+			// 	.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
+			// 	.collect();
+
+			// TODO: Replace this error with an Error that specifies stage_4 of proof verification failed
+			// verify_leaves_proof(mmr_root.into(), nodes, stage_4_proof).map_err(|_| Error::<T, I>::XcmpProofNotValid)?;
+
+			// Now process messages upstream
+			// let xcmp_messages = Decode::decode(stage_4_leaves);
+			// Send Xcmp Messages upstream to be decoded to XCM messages and processed
+			// T::ProcessXcmpMessages(xcmp_messages);
+
+			// Log Event..
+
 			Ok(())
 		}
 	}
