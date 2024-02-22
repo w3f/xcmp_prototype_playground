@@ -5,12 +5,15 @@ use jsonrpsee::{
     rpc_params,
 };
 use parity_scale_codec::{Decode, Encode};
-use runtime::{MmrParaA, Block, Header, BlockNumber, Hash};
+use runtime::{Block, BlockNumber, Hash, Header, MmrParaA, UncheckedExtrinsic};
 use std::{path::PathBuf, collections::BTreeMap};
 use std::sync::Mutex;
 use lazy_static::lazy_static;
 
-use sp_runtime::traits::Keccak256;
+use sp_runtime::traits::{
+	Keccak256,
+	Block as BlockT
+};
 
 use sp_core::H256;
 
@@ -84,7 +87,7 @@ type BeefyMmrRoot = H256;
 type RelayBlockIndex = u32;
 
 lazy_static! {
-    static ref BEEFY_MMR_MAP: Mutex<BTreeMap<BeefyMmrRoot, RelayBlockIndex>> = Mutex::new(BTreeMap::new());
+	static ref BEEFY_MMR_MAP: Mutex<BTreeMap<BeefyMmrRoot, (RelayBlockIndex, LeavesProof<H256>)>> = Mutex::new(BTreeMap::new());
 }
 
 #[tokio::main]
@@ -133,14 +136,43 @@ async fn collect_relay_beefy_roots(client: &MultiClient) -> anyhow::Result<()> {
 					None
 				}
 			};
+
 			// let request: Option<Hash> = client.rpc_client.request("mmr_root", params).await?;
 			log::info!("After relay beefy root request");
 			let root = request.ok_or(RelayerError::Default)?;
 			log::info!("Got Current Beefy Root from Relaychain {:?}", root);
 
+			// let request: Option<Block> = client.rpc_client.request("chain_getBlock", rpc_params![Option::<Hash>::None]).await?;
+			let request: Option<Header> = match client.rpc_client.request("chain_getHeader", rpc_params![Option::<Hash>::None]).await {
+				Ok(block) => {
+					block
+				},
+				Err(e) => {
+					log::error!("Could not get block from chain with error {:?}", e);
+					None
+				}
+			};
+			log::info!("After chain block request");
+			let rpc_header = request.ok_or(RelayerError::Default)?;
+			if rpc_header.number != block.number() {
+				log::error!(
+					"RPC_Requested Block does not match Loop Block {} != {}",
+					rpc_header.number,
+					block.number()
+				);
+			}
+
+			let proof = try_generate_mmr_proof(&client, block.number().into(), Some(0u64))
+				.await
+				.map_err(|e| {
+					log::error!("Failed to generate big proof from Relaychain with error {:?}", e);
+					RelayerError::Default
+				}
+			)?;
+
 			match BEEFY_MMR_MAP.try_lock() {
 				Ok(mut s) => {
-					s.insert(root, block.number());
+					s.insert(root, (block.number(), proof));
 					log::info!(
 						"Inserting into storage Beefy root {:?}, for relay block number {}",
 						root,
@@ -172,10 +204,6 @@ async fn generate_stage_1_proof(client: &MultiClient, relay_client: &MultiClient
 				log::info!("Got root from `get_current_beefy_root` {:?}", root);
 				root
 			},
-			// Ok(None) => {
-			// 	log::info!("Got none from `get_current_beefy_root`");
-			// 	H256::zero()
-			// },
 			Err(e) => {
 				log::info!("Got error from trying to call `get_current_beefy_root` {:?}", e);
 				H256::zero()
@@ -184,7 +212,7 @@ async fn generate_stage_1_proof(client: &MultiClient, relay_client: &MultiClient
 	log::info!("Beefy Root obtained in generate_stage_1_proof: {:?}", beefy_root);
 
 	// 2.) Then call RPC to generate mmr_proof for Relay block number corresponding to this Beefy Root
-	let relay_block_num = match BEEFY_MMR_MAP.try_lock() {
+	let (relay_block_num, proof) = match BEEFY_MMR_MAP.try_lock() {
 		Ok(s) => {
 			s.get(&beefy_root).cloned()
 		},
@@ -193,19 +221,12 @@ async fn generate_stage_1_proof(client: &MultiClient, relay_client: &MultiClient
 			None
 		}
 	}.ok_or_else(|| {
-			log::info!("Could not read relay_block_num from BEEFY_MMR_MAP");
+			log::info!("Could not read relay_block_num and proof from BEEFY_MMR_MAP");
 			RelayerError::Default
 		}
 	)?;
 
 	log::info!("Got Relayblock Num {} for Beefy Root {:?}", relay_block_num, beefy_root);
-
-	// proof needs to be from relaychain client
-	let proof = try_generate_mmr_proof(&relay_client, relay_block_num.into(), Some(0u64)).await
-		.map_err(|e| {
-			log::error!("Failed to generate big proof from Relaychain with error {:?}", e);
-			RelayerError::Default
-	})?;
 
 	// 3.) Send transaction to chain for proof
 	log::info!("calling submit_big_proof");
@@ -243,7 +264,6 @@ async fn submit_big_proof(client: &MultiClient, proof: LeavesProof<H256>, beefy_
 	let decoded_proof: XcmpProofType<H256> = Decode::decode(&mut &proof.proof.0[..])
 			.map_err(|e| anyhow::Error::new(e))?;
 
-	// TODO: Need to find how to get this type from subxts metadata
 	let dummy_proof: XcmpProofType<H256> = XcmpProofType::<H256> {
 		leaf_indices: Vec::new(),
 		leaf_count: 0u64,
