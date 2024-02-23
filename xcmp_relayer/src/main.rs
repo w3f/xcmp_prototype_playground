@@ -107,6 +107,13 @@ async fn main() -> anyhow::Result<()> {
 	// Keep track of Mmr Index which correspondings to the receiver..
 	// let _ = collect_all_mmr_roots_for_sender(&sender_api).await?;
 
+	// TODO: Collect all ParaHeaders from sender in order to generate opening in
+	// ParaHeader Merkle tree (ParaId, ParaHeader(As HeadData))
+	// TODO: Add this as a RuntimeApi for generating this from the Relaychain directly
+	// since data is stored there and proof can easily be generated from Validator
+	// Then just Relay this over to receiver correctly in stage 2 of proof
+	// How to convert ParaHeader -> HeadData? Just encode the header as bytes??
+
 	let _ = log_all_mmr_roots(&para_sender_api).await?;
 	let _ = log_all_mmr_proofs(&para_sender_api).await?;
 	let _ = get_proof_and_verify(&para_sender_api, &relay_api).await?;
