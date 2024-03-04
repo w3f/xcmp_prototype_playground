@@ -5,7 +5,7 @@ panic = "unwind"
 members = [
 	"node",
 	"pallets/*",
-	"runtime",
+	"runtime", "subxt_test",
     "xcmp_relayer",
 ]
 resolver = "2"
@@ -132,6 +132,7 @@ polkadot-cli = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_
 polkadot-primitives = { git = "https://github.com/coax1d/polkadot-sdk", branch = "xcmp_customized_sdk", default-features = false }
 pallet-xcm = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
 polkadot-parachain = { package = "polkadot-parachain-primitives", git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
+polkadot-runtime-parachains = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
 polkadot-runtime-common = { git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
 xcm = { package = "staging-xcm", git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }
 xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/coax1d/polkadot-sdk", default-features = false, branch = "xcmp_customized_sdk" }

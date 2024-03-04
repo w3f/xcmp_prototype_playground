@@ -76,17 +76,27 @@ PARACHAIN_PID=$!
 echo "Parachain started with PID: $PARACHAIN_PID"
 sleep 5 
 
+nohup ./bin/polkadot --alice --tmp --allow-private-ip --discover-local --chain zombienet/rococo-local.json --rpc-port 54886 &
+
+RELAYCHAIN_PID=$!
+
+echo "Relaychain started with PID: $RELAYCHAIN_PID"
+sleep 5 
+
 echo "Now building Relayer"
 cargo build --release -p xcmp_relayer
 
 if [ $? -eq 0 ]; then
-    echo "Building Parachain Succeeded"
+    echo "Building Relayer Succeeded"
 else
-    echo "Building Parachain Failed"
+    echo "Building Relayer Failed"
+    kill $PARACHAIN_PID
+    kill $RELAYCHAIN_PID
     exit 1
 fi
 
 kill $PARACHAIN_PID
+kill $RELAYCHAIN_PID
 
 sleep 2
 
@@ -94,6 +104,12 @@ if kill -0 $PARACHAIN_PID 2>/dev/null; then
     echo "Parachain node could not be killed"
 else
     echo "Parachain node killed successfully"
+fi
+
+if kill -0 $RELAYCHAIN_PID 2>/dev/null; then
+    echo "Relaychain node could not be killed"
+else
+    echo "Relaychain node killed successfully"
 fi
 
 echo "Build complete!!"

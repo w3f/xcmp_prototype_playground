@@ -13362,6 +13362,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "subxt_test"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "subxt",
+ "subxt-signer",
+ "tokio",
+]
+
+[[package]]
 name = "syn"
 version = "1.0.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -15416,6 +15426,8 @@ dependencies = [
  "mmr-rpc",
  "parachain-template-runtime",
  "parity-scale-codec",
+ "polkadot-parachain-primitives",
+ "polkadot-runtime-parachains",
  "serde_json",
  "sp-core",
  "sp-mmr-primitives",

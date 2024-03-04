@@ -31,6 +31,15 @@ use subxt_signer::{sr25519::dev, ecdsa::dev::alice};
 #[subxt::subxt(runtime_metadata_url = "ws://localhost:54887")]
 pub mod polkadot { }
 
+#[subxt::subxt(runtime_metadata_url = "ws://localhost:54886")]
+pub mod relay { }
+
+use relay::runtime_types::polkadot_runtime_parachains::paras::{
+	ParaMerkleProof, ParaLeaf,
+};
+
+use relay::runtime_types::polkadot_parachain_primitives::primitives::Id as ParaId;
+
 use polkadot::runtime_types::{
 	pallet_xcmp_message_stuffer::XcmpProof,
 	sp_mmr_primitives::Proof as XcmpProofType,
@@ -88,6 +97,7 @@ type RelayBlockIndex = u32;
 
 lazy_static! {
 	static ref BEEFY_MMR_MAP: Mutex<BTreeMap<BeefyMmrRoot, (RelayBlockIndex, LeavesProof<H256>)>> = Mutex::new(BTreeMap::new());
+	static ref PARA_HEADERS_MAP: Mutex<BTreeMap<BeefyMmrRoot, ParaMerkleProof>> = Mutex::new(BTreeMap::new());
 }
 
 #[tokio::main]
@@ -109,6 +119,7 @@ async fn main() -> anyhow::Result<()> {
 
 	// TODO: Collect all ParaHeaders from sender in order to generate opening in
 	// ParaHeader Merkle tree (ParaId, ParaHeader(As HeadData))
+	let _ = collect_all_para_header_proofs(&relay_api).await?;
 	// TODO: Add this as a RuntimeApi for generating this from the Relaychain directly
 	// since data is stored there and proof can easily be generated from Validator
 	// Then just Relay this over to receiver correctly in stage 2 of proof
@@ -121,6 +132,44 @@ async fn main() -> anyhow::Result<()> {
 	let subscribe = log_all_blocks(&vec![para_sender_api, para_receiver_api, relay_api]).await?;
 
 	std::future::pending::<()>().await;
+	Ok(())
+}
+
+async fn collect_all_para_header_proofs(client: &MultiClient) -> anyhow::Result<()> {
+	let client = client.clone();
+	task::spawn(async move {
+		let mut blocks_sub = client.subxt_client.blocks().subscribe_best().await?;
+		while let Some(block) = blocks_sub.next().await {
+			let block = block?;
+
+			let id = ParaId(0u32);
+
+			let para_merkle_call = relay::apis().paras_api().get_para_heads_proof(id);
+			let para_merkle_proof =  match client.subxt_client
+				.runtime_api()
+				.at_latest()
+				.await?
+				.call(para_merkle_call)
+			.await {
+				Ok(opt_proof) => {
+					opt_proof
+				},
+				Err(e) => {
+					log::error!("Error calling Para Merkle Proof Api with error {:?}", e);
+					None
+				}
+			};
+
+			if let Some(proof) = para_merkle_proof {
+				log::info!("Got Proof can store now into storage");
+			}
+			else {
+				log::error!("No Para Merkle Proof obtained!!!!");
+			}
+
+			}
+		Ok::<(), anyhow::Error>(())
+	});
 	Ok(())
 }
 
