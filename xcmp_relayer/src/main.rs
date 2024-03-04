@@ -142,7 +142,7 @@ async fn collect_all_para_header_proofs(client: &MultiClient) -> anyhow::Result<
 		while let Some(block) = blocks_sub.next().await {
 			let block = block?;
 
-			let id = ParaId(0u32);
+			let id = ParaId(1000u32);
 
 			let para_merkle_call = relay::apis().paras_api().get_para_heads_proof(id);
 			let para_merkle_proof =  match client.subxt_client
@@ -161,7 +161,7 @@ async fn collect_all_para_header_proofs(client: &MultiClient) -> anyhow::Result<
 			};
 
 			if let Some(proof) = para_merkle_proof {
-				log::info!("Got Proof can store now into storage");
+				log::info!("Got Proof can store now into storage {:?}", proof);
 			}
 			else {
 				log::error!("No Para Merkle Proof obtained!!!!");
