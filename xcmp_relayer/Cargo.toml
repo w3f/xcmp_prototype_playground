@@ -9,6 +9,8 @@ description = "Relayer for XCMP"
 [dependencies]
 runtime = { path = "../runtime", package = "parachain-template-runtime" }
 
+polkadot-runtime-parachains = { workspace = true }
+polkadot-parachain = { workspace = true }
 serde_json = { workspace = true }
 parity-scale-codec = { workspace = true }
 jsonrpsee = { workspace = true }

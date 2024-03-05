@@ -9,6 +9,7 @@ use frame_system::pallet_prelude::*;
 use cumulus_primitives_core::{ParaId, GetBeefyRoot};
 use sp_runtime::traits::{Hash as HashT, Keccak256};
 use sp_core::H256;
+use polkadot_runtime_parachains::paras::ParaMerkleProof;
 
 use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf, DataOrHash};
 use scale_info::prelude::vec::Vec;
@@ -32,7 +33,6 @@ pub trait XcmpMessageProvider<Hash> {
 
 type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
 type MmrProof = Proof<H256>;
-type LeafOf<T, I> = <crate::Pallet<T, I> as LeafDataProvider>::LeafData;
 type ChannelId = u64;
 type BinaryMerkleProof = ();
 
@@ -42,7 +42,7 @@ pub struct XcmpProof {
 	// TODO: Probably should rename each of these stages to some fancy name
 	// TODO: Remove tuples
 	pub stage_1: (MmrProof, Vec<EncodableOpaqueLeaf>),
-	pub stage_2: BinaryMerkleProof,
+	pub stage_2: ParaMerkleProof,
 	pub stage_3: BinaryMerkleProof,
 	pub stage_4: (MmrProof, Vec<EncodableOpaqueLeaf>),
 }
@@ -124,7 +124,7 @@ pub mod pallet {
 		// TODO: This will
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn submit_xcmp_proof(origin: OriginFor<T>, mmr_proof: MmrProof, leaves: Vec<EncodableOpaqueLeaf>, channel_id: u64) -> DispatchResult {
+		pub fn submit_test_proof(origin: OriginFor<T>, mmr_proof: MmrProof, leaves: Vec<EncodableOpaqueLeaf>, channel_id: u64) -> DispatchResult {
 			ensure_signed(origin)?;
 
 			log::info!(
@@ -183,7 +183,7 @@ pub mod pallet {
 		/// TODO: Change to support multiple leaves..
 		#[pallet::call_index(2)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn submit_big_proof(origin: OriginFor<T>, xcmp_proof: XcmpProof, beefy_root_targeted: H256) -> DispatchResult {
+		pub fn submit_xcmp_proof(origin: OriginFor<T>, xcmp_proof: XcmpProof, beefy_root_targeted: H256) -> DispatchResult {
 			ensure_signed(origin)?;
 
 			log::info!(
@@ -282,7 +282,7 @@ pub mod pallet {
 pub struct OnNewRootSatisfier<T>(PhantomData<T>);
 
 impl<T> pallet_mmr::primitives::OnNewRoot<sp_consensus_beefy::MmrRootHash> for OnNewRootSatisfier<T> {
-	fn on_new_root(root: &sp_consensus_beefy::MmrRootHash) {
+	fn on_new_root(_root: &sp_consensus_beefy::MmrRootHash) {
 
 	}
 }
