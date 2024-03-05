@@ -9,8 +9,9 @@ use frame_system::pallet_prelude::*;
 use cumulus_primitives_core::{ParaId, GetBeefyRoot};
 use sp_runtime::traits::{Hash as HashT, Keccak256};
 use sp_core::H256;
+use polkadot_runtime_parachains::paras::{ParaMerkleProof, ParaLeaf};
 
-use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf, DataOrHash};
+use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf, DataOrHash, LeafIndex};
 use scale_info::prelude::vec::Vec;
 
 #[cfg(test)]
@@ -34,15 +35,18 @@ type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMess
 type MmrProof = Proof<H256>;
 type LeafOf<T, I> = <crate::Pallet<T, I> as LeafDataProvider>::LeafData;
 type ChannelId = u64;
+// type BinaryMerkleProof = ParaMerkleProof;
 type BinaryMerkleProof = ();
 
+#[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
+pub struct MyTestType;
 
 #[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
 pub struct XcmpProof {
 	// TODO: Probably should rename each of these stages to some fancy name
 	// TODO: Remove tuples
 	pub stage_1: (MmrProof, Vec<EncodableOpaqueLeaf>),
-	pub stage_2: BinaryMerkleProof,
+	pub stage_2: ParaMerkleProof,
 	pub stage_3: BinaryMerkleProof,
 	pub stage_4: (MmrProof, Vec<EncodableOpaqueLeaf>),
 }
@@ -271,6 +275,12 @@ pub mod pallet {
 
 			// Log Event..
 
+			Ok(())
+		}
+
+		#[pallet::call_index(3)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn tester(origin: OriginFor<T>, test: MyTestType) -> DispatchResult {
 			Ok(())
 		}
 	}

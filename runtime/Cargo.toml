@@ -59,6 +59,7 @@ sp-mmr-primitives = { workspace = true }
 # Polkadot
 pallet-xcm = { workspace = true }
 polkadot-parachain = { workspace = true }
+polkadot-runtime-parachains = { workspace = true }
 polkadot-runtime-common = { workspace = true }
 xcm = { workspace = true }
 xcm-builder = { workspace = true }

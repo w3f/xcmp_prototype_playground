@@ -5,6 +5,7 @@ use jsonrpsee::{
     rpc_params,
 };
 use parity_scale_codec::{Decode, Encode};
+// use polkadot_runtime_parachains::ParaMerkleProof as RelayParaMerkleProof;
 use runtime::{Block, BlockNumber, Hash, Header, MmrParaA, UncheckedExtrinsic};
 use std::{path::PathBuf, collections::BTreeMap};
 use std::sync::Mutex;
@@ -24,7 +25,7 @@ use futures::StreamExt;
 use subxt::{OnlineClient, PolkadotConfig, backend::rpc::{RpcClient, RpcClientT}};
 
 use mmr_rpc::LeavesProof;
-use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf};
+use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf, LeafIndex};
 
 use subxt_signer::{sr25519::dev, ecdsa::dev::alice};
 
@@ -35,14 +36,16 @@ pub mod polkadot { }
 pub mod relay { }
 
 use relay::runtime_types::polkadot_runtime_parachains::paras::{
-	ParaMerkleProof, ParaLeaf,
+	ParaMerkleProof as RelayParaMerkleProof, ParaLeaf as RelayParaLeaf,
 };
 
 use relay::runtime_types::polkadot_parachain_primitives::primitives::Id as ParaId;
 
 use polkadot::runtime_types::{
-	pallet_xcmp_message_stuffer::XcmpProof,
+	pallet_xcmp_message_stuffer::{XcmpProof},
 	sp_mmr_primitives::Proof as XcmpProofType,
+	polkadot_runtime_parachains::paras::{ParaMerkleProof, ParaLeaf},
+	polkadot_parachain_primitives::primitives::Id as ParachainParaId
 };
 
 /// The default endpoints for each
@@ -92,12 +95,66 @@ impl ClientType {
 	}
 }
 
+impl From<RelayParaMerkleProof> for ParaMerkleProof {
+	fn from(x: RelayParaMerkleProof) -> Self {
+		Self {
+			root: x.root,
+			proof: x.proof,
+			num_leaves: x.num_leaves,
+			leaf_index: x.leaf_index,
+			leaf: x.leaf.into(),
+		}
+	}
+}
+
+impl From<RelayParaLeaf> for ParaLeaf {
+	fn from(x: RelayParaLeaf) -> Self {
+		Self {
+			para_id: x.para_id.into(),
+			head_data: x.head_data,
+		}
+	}
+}
+
+impl From<ParaId> for ParachainParaId {
+	fn from(x: ParaId) -> Self {
+		Self(x.0)
+	}
+}
+
+impl Clone for RelayParaMerkleProof {
+	fn clone(&self) -> Self {
+		Self {
+			root: self.root.clone(),
+			proof: self.proof.clone(),
+			num_leaves: self.num_leaves.clone(),
+			leaf_index: self.leaf_index.clone(),
+			leaf: self.leaf.clone(),
+		}
+	}
+}
+
+impl Clone for ParaId {
+	fn clone(&self) -> Self {
+		Self(self.0)
+	}
+}
+
+impl Clone for RelayParaLeaf {
+	fn clone(&self) -> Self {
+		Self {
+			para_id: self.para_id.clone().into(),
+			head_data: self.head_data.clone()
+		}
+	}
+}
+
 type BeefyMmrRoot = H256;
 type RelayBlockIndex = u32;
 
 lazy_static! {
 	static ref BEEFY_MMR_MAP: Mutex<BTreeMap<BeefyMmrRoot, (RelayBlockIndex, LeavesProof<H256>)>> = Mutex::new(BTreeMap::new());
-	static ref PARA_HEADERS_MAP: Mutex<BTreeMap<BeefyMmrRoot, ParaMerkleProof>> = Mutex::new(BTreeMap::new());
+	static ref PARA_HEADERS_MAP: Mutex<BTreeMap<BeefyMmrRoot, RelayParaMerkleProof>> = Mutex::new(BTreeMap::new());
 }
 
 #[tokio::main]
@@ -160,12 +217,46 @@ async fn collect_all_para_header_proofs(client: &MultiClient) -> anyhow::Result<
 				}
 			};
 
-			if let Some(proof) = para_merkle_proof {
-				log::info!("Got Proof can store now into storage {:?}", proof);
-			}
-			else {
-				log::error!("No Para Merkle Proof obtained!!!!");
-			}
+			// if let Some(proof) = para_merkle_proof {
+			// 	log::info!("Got Proof can store now into storage {:?}", proof);
+			// }
+			// else {
+			// 	log::error!("No Para Merkle Proof obtained!!!!");
+			// }
+
+			// let id = ParaId(1000u32);
+
+			// let para_merkle_call = relay::apis().paras_api().get_para_heads_proof(id);
+			// let para_merkle_proof =  match client.subxt_client
+			// 	.runtime_api()
+			// 	.at_latest()
+			// 	.await?
+			// 	.call(para_merkle_call)
+			// .await {
+			// 	Ok(opt_proof) => {
+			// 		opt_proof
+			// 	},
+			// 	Err(e) => {
+			// 		log::error!("Error calling Para Merkle Proof Api with error {:?}", e);
+			// 		None
+			// 	}
+			// };
+
+			// let para_merkle_proof = para_merkle_proof.ok_or_else(|| {
+			// 	log::error!("No Para Merkle Proof obtained!!!!");
+			// 	RelayerError::Default
+			// })?;
+
+			// match PARA_HEADERS_MAP.try_lock() {
+			// 	Ok(mut s) => {
+			// 		log::info!(
+			// 			"Inserting into storage para_merkle_proof for relay block number {}",
+			// 			block.number()
+			// 		);
+			// 		s.insert(H256::zero(), para_merkle_proof);
+			// 	},
+			// 	Err(_) => log::error!("Could not lock PARA_HEADERS_MAP for writing")
+			// }
 
 			}
 		Ok::<(), anyhow::Error>(())
@@ -228,7 +319,7 @@ async fn collect_relay_beefy_roots(client: &MultiClient) -> anyhow::Result<()> {
 
 			match BEEFY_MMR_MAP.try_lock() {
 				Ok(mut s) => {
-					s.insert(root, (block.number(), proof));
+					s.insert(root.clone(), (block.number(), proof));
 					log::info!(
 						"Inserting into storage Beefy root {:?}, for relay block number {}",
 						root,
@@ -238,7 +329,42 @@ async fn collect_relay_beefy_roots(client: &MultiClient) -> anyhow::Result<()> {
 				Err(_) => log::error!("Could not lock BEEFY_MMR_MAP for writing")
 			}
 
+			let id = ParaId(1000u32);
+
+			let para_merkle_call = relay::apis().paras_api().get_para_heads_proof(id);
+			let para_merkle_proof =  match client.subxt_client
+				.runtime_api()
+				.at_latest()
+				.await?
+				.call(para_merkle_call)
+			.await {
+				Ok(opt_proof) => {
+					opt_proof
+				},
+				Err(e) => {
+					log::error!("Error calling Para Merkle Proof Api with error {:?}", e);
+					None
+				}
+			};
+
+			let para_merkle_proof = para_merkle_proof.ok_or_else(|| {
+				log::error!("No Para Merkle Proof obtained!!!!");
+				RelayerError::Default
+			})?;
+
+			match PARA_HEADERS_MAP.try_lock() {
+				Ok(mut s) => {
+					log::info!(
+						"Inserting into storage para_merkle_proof for relay block number {}",
+						block.number()
+					);
+					s.insert(root, para_merkle_proof);
+				},
+				Err(_) => log::error!("Could not lock PARA_HEADERS_MAP for writing")
+			}
+
 			log::info!("Beefy Mmr Root from Relaychain Obtained:: {:?}", root);
+			log::info!("Para Merkle Proof from Relaychain Obtained");
 		}
 		Ok::<(), anyhow::Error>(())
 	});
@@ -282,11 +408,57 @@ async fn generate_stage_1_proof(client: &MultiClient, relay_client: &MultiClient
 		}
 	)?;
 
+	let merkle_proof = match PARA_HEADERS_MAP.try_lock() {
+		Ok(s) => {
+			s.get(&beefy_root).cloned()
+		},
+		Err(_) => {
+			log::info!("Could not lock PARA_HEADERS_MAP for reading");
+			None
+		}
+	}.ok_or_else(|| {
+			log::info!("Could not read proof from PARA_HEADERS_MAP");
+			RelayerError::Default
+		}
+	)?;
+
+	let leaves = Decode::decode(&mut &proof.leaves.0[..])
+			.map_err(|e| anyhow::Error::new(e))?;
+	let decoded_proof: XcmpProofType<H256> = Decode::decode(&mut &proof.proof.0[..])
+			.map_err(|e| anyhow::Error::new(e))?;
+
+	let dummy_proof: XcmpProofType<H256> = XcmpProofType::<H256> {
+		leaf_indices: Vec::new(),
+		leaf_count: 0u64,
+		items: Vec::new(),
+	};
+
+	// let dummy_merkle = ParaMerkleProof {
+	// 	// pub root: sp_core::H256,
+	// 	// pub proof: Vec<sp_core::H256>,
+	// 	// pub num_leaves: u64,
+	// 	// pub leaf_index: u64,
+	// 	// pub leaf: ParaLeaf
+	// 	root: H256::zero(),
+	// 	proof: Vec::new(),
+	// 	num_leaves: 0,
+	// 	leaf_index: 0,
+	// 	leaf: ParaLeaf { para_id: ParachainParaId(0u32), head_data: Vec::new() },
+	// };
+
+	let xcmp_proof = XcmpProof {
+		stage_1: (decoded_proof, leaves),
+		stage_2: merkle_proof.into(),
+		stage_3: (),
+		// TODO: Remove. For now just testing stage 1 can pass
+		stage_4: (dummy_proof, Vec::new()),
+	};
+
 	log::info!("Got Relayblock Num {} for Beefy Root {:?}", relay_block_num, beefy_root);
 
 	// 3.) Send transaction to chain for proof
 	log::info!("calling submit_big_proof");
-	submit_big_proof(&client, proof, beefy_root).await?;
+	submit_big_proof(&client, xcmp_proof, beefy_root).await?;
 
 	Ok(())
 }
@@ -313,25 +485,38 @@ async fn update_root(client: &MultiClient, root: H256) -> anyhow::Result<()> {
 	Ok(())
 }
 
-async fn submit_big_proof(client: &MultiClient, proof: LeavesProof<H256>, beefy_root: H256) -> anyhow::Result<()> {
+async fn submit_big_proof(client: &MultiClient, xcmp_proof: XcmpProof, beefy_root: H256) -> anyhow::Result<()> {
 	let signer = dev::charlie();
-	let leaves = Decode::decode(&mut &proof.leaves.0[..])
-			.map_err(|e| anyhow::Error::new(e))?;
-	let decoded_proof: XcmpProofType<H256> = Decode::decode(&mut &proof.proof.0[..])
-			.map_err(|e| anyhow::Error::new(e))?;
+	// let leaves = Decode::decode(&mut &proof.leaves.0[..])
+	// 		.map_err(|e| anyhow::Error::new(e))?;
+	// let decoded_proof: XcmpProofType<H256> = Decode::decode(&mut &proof.proof.0[..])
+	// 		.map_err(|e| anyhow::Error::new(e))?;
 
-	let dummy_proof: XcmpProofType<H256> = XcmpProofType::<H256> {
-		leaf_indices: Vec::new(),
-		leaf_count: 0u64,
-		items: Vec::new(),
-	};
-	let xcmp_proof = XcmpProof {
-		stage_1: (decoded_proof, leaves),
-		stage_2: (),
-		stage_3: (),
-		// TODO: Remove. For now just testing stage 1 can pass
-		stage_4: (dummy_proof, Vec::new()),
-	};
+	// let dummy_proof: XcmpProofType<H256> = XcmpProofType::<H256> {
+	// 	leaf_indices: Vec::new(),
+	// 	leaf_count: 0u64,
+	// 	items: Vec::new(),
+	// };
+
+	// let dummy_merkle = ParaMerkleProof {
+	// 	// pub root: sp_core::H256,
+	// 	// pub proof: Vec<sp_core::H256>,
+	// 	// pub num_leaves: u64,
+	// 	// pub leaf_index: u64,
+	// 	// pub leaf: ParaLeaf
+	// 	root: H256::zero(),
+	// 	proof: Vec::new(),
+	// 	num_leaves: 0,
+	// 	leaf_index: 0,
+	// 	leaf: ParaLeaf { para_id: ParachainParaId(0u32), head_data: Vec::new() },
+	// };
+	// let xcmp_proof = XcmpProof {
+	// 	stage_1: (decoded_proof, leaves),
+	// 	stage_2: dummy_merkle,
+	// 	stage_3: (),
+	// 	// TODO: Remove. For now just testing stage 1 can pass
+	// 	stage_4: (dummy_proof, Vec::new()),
+	// };
 
 	log::info!("Constructed Dummy Proof and XCMP Proof");
 

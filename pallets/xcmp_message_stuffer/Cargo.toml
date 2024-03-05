@@ -27,6 +27,9 @@ sp-runtime = { workspace = true, default-features = false }
 sp-mmr-primitives = { workspace = true }
 sp-api = { workspace = true }
 
+# Polkadot
+polkadot-runtime-parachains = { workspace = true }
+
 # Cumulus
 cumulus-primitives-core = { workspace = true, default-features = false }
 
@@ -52,6 +55,7 @@ default = ["std"]
 runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]
 std = [
 	"parity-scale-codec/std",
+	"polkadot-runtime-parachains/std",
 	"cumulus-pallet-parachain-system/std",
     "cumulus-primitives-core/std",
 	"frame-benchmarking/std",
