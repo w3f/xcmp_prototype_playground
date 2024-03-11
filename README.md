@@ -10,7 +10,7 @@ In a scenario where `ParaA` wants to send a message to `ParaB` (`ParaA -> ParaB`
 
 ## Approach
 
-### The proofs which are constructed via a Relayer involve a 4 tiered authenticated datastructure using 2 Binary Merkle Trees and 2 MMRs.
+### The proofs which are constructed via a Relayer involve a 4 tiered authenticated datastructure using 2 Binary Merkle Trees and 2 MMRs.
 
 ### ChannelMessageMmr
 - This is one of many MMRs which XCMP messages are stored into. There is a single XCMP message per block so each index can be thought of as the message contents for a particular block.
