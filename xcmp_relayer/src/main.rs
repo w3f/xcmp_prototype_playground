@@ -4,11 +4,9 @@ use jsonrpsee::{
     rpc_params,
 };
 use parity_scale_codec::Decode;
-use runtime::{BlockNumber, Hash, Header};
+use runtime::{pallet_xcmp_message_stuffer::ChannelMerkleProof, BlockNumber, Hash, Header};
 use std::{
-	collections::BTreeMap,
-	sync::Mutex,
-	time::Duration,
+	collections::BTreeMap, ops::Sub, sync::Mutex, time::Duration
 };
 
 use lazy_static::lazy_static;
@@ -39,7 +37,8 @@ use polkadot::runtime_types::{
 	pallet_xcmp_message_stuffer::XcmpProof,
 	sp_mmr_primitives::Proof as XcmpProofType,
 	polkadot_runtime_parachains::paras::{ParaMerkleProof, ParaLeaf},
-	polkadot_parachain_primitives::primitives::Id as ParachainParaId
+	polkadot_parachain_primitives::primitives::Id as ParachainParaId,
+	pallet_xcmp_message_stuffer::ChannelMerkleProof as SubxtChannelMerkleProof,
 };
 
 /// The default endpoints for each
@@ -49,6 +48,8 @@ const DEFAULT_ENDPOINT_PARA_RECEIVER: &str = "ws://localhost:54887";
 const DEFAULT_RPC_ENDPOINT_PARA_RECEIVER: &str = "http://localhost:54887";
 const DEFAULT_ENDPOINT_RELAY: &str = "ws://localhost:54886";
 const DEFAULT_RPC_ENDPOINT_RELAY: &str = "http://localhost:54886";
+
+const RECEIVER_CHANNEL_ID: u64 = 0;
 
 #[derive(Clone, Debug)]
 pub struct MultiClient {
@@ -85,6 +86,30 @@ impl ClientType {
 			1 => ClientType::Receiver,
 			2 => ClientType::Relay,
 			_ => panic!(),
+		}
+	}
+}
+
+impl From<SubxtChannelMerkleProof> for ChannelMerkleProof {
+	fn from(x: SubxtChannelMerkleProof) -> Self {
+		Self {
+			root: x.root,
+			proof: x.proof,
+			num_leaves: x.num_leaves,
+			leaf_index: x.leaf_index,
+			leaf: x.leaf
+		}
+	}
+}
+
+impl From<ChannelMerkleProof> for SubxtChannelMerkleProof {
+	fn from(x: ChannelMerkleProof) -> Self {
+		Self {
+			root: x.root,
+			proof: x.proof,
+			num_leaves: x.num_leaves,
+			leaf_index: x.leaf_index,
+			leaf: x.leaf
 		}
 	}
 }
@@ -149,6 +174,8 @@ type RelayBlockIndex = u32;
 lazy_static! {
 	static ref BEEFY_MMR_MAP: Mutex<BTreeMap<BeefyMmrRoot, (RelayBlockIndex, LeavesProof<H256>)>> = Mutex::new(BTreeMap::new());
 	static ref PARA_HEADERS_MAP: Mutex<BTreeMap<BeefyMmrRoot, RelayParaMerkleProof>> = Mutex::new(BTreeMap::new());
+	static ref MSG_ROOT_MAP: Mutex<BTreeMap<H256, LeavesProof<H256>>> = Mutex::new(BTreeMap::new());
+	static ref MSG_ROOT_CHANNEL_MERKLE_MAP: Mutex<BTreeMap<H256, ChannelMerkleProof>> = Mutex::new(BTreeMap::new());
 }
 
 #[tokio::main]
@@ -165,6 +192,7 @@ async fn main() -> anyhow::Result<()> {
 	// Collect all ParaHeaders from sender in order to generate opening in
 	// 2.) ParaHeader Merkle tree (ParaId, ParaHeader(As HeadData))
 	let _ = collect_relay_data(&relay_api).await?;
+	let _ = collect_para_data(&para_sender_api).await?;
 
 	// TODO: Create mapping between Parablock Num -> Vec of all channel Mmr Roots for sender
 	// Keep track of Mmr Index which correspondings to the receiver..
@@ -177,7 +205,7 @@ async fn main() -> anyhow::Result<()> {
 
 	let _ = log_all_mmr_roots(&para_sender_api).await?;
 	let _ = log_all_mmr_proofs(&para_sender_api).await?;
-	let _ = get_proof_and_verify(&para_sender_api, &relay_api).await?;
+	let _ = get_proof_and_verify(&para_sender_api, &relay_api, &para_receiver_api).await?;
 
 	let _subscribe = log_all_blocks(&vec![para_sender_api, para_receiver_api, relay_api]).await?;
 
@@ -205,12 +233,10 @@ async fn collect_relay_data(client: &MultiClient) -> anyhow::Result<()> {
 				}
 			};
 
-			// let request: Option<Hash> = client.rpc_client.request("mmr_root", params).await?;
 			log::debug!("After relay beefy root request");
 			let root = request.ok_or(RelayerError::Default)?;
 			log::debug!("Got Current Beefy Root from Relaychain {:?}", root);
 
-			// let request: Option<Block> = client.rpc_client.request("chain_getBlock", rpc_params![Option::<Hash>::None]).await?;
 			let request: Option<Header> = match client.rpc_client.request("chain_getHeader", rpc_params![Option::<Hash>::None]).await {
 				Ok(block) => {
 					block
@@ -230,7 +256,7 @@ async fn collect_relay_data(client: &MultiClient) -> anyhow::Result<()> {
 				);
 			}
 
-			let proof = try_generate_mmr_proof(&client, block.number().into(), Some(0u64))
+			let proof = try_generate_mmr_proof(&client, block.number().into(), Some(RECEIVER_CHANNEL_ID))
 				.await
 				.map_err(|e| {
 					log::error!("Failed to generate big proof from Relaychain with error {:?}", e);
@@ -293,9 +319,158 @@ async fn collect_relay_data(client: &MultiClient) -> anyhow::Result<()> {
 	Ok(())
 }
 
-async fn generate_stage_xcmp_proof(client: &MultiClient, _relay_client: &MultiClient) -> anyhow::Result<()> {
+async fn collect_para_data(client: &MultiClient) -> anyhow::Result<()> {
+	let client = client.clone();
+	task::spawn(async move {
+		let mut blocks_sub = client.subxt_client.blocks().subscribe_best().await?;
+		while let Some(block) = blocks_sub.next().await {
+			let block = block?;
+
+			let msg_root = generate_mmr_root(&client, Some(RECEIVER_CHANNEL_ID)).await?;
+			let msg_proof = generate_mmr_proof(&client, block.number().into(), Some(RECEIVER_CHANNEL_ID)).await?;
+
+			match MSG_ROOT_MAP.try_lock() {
+				Ok(mut s) => {
+					s.insert(msg_root.clone(), msg_proof);
+					log::debug!(
+						"Inserting into storage Msg root {:?}",
+						msg_root
+					);
+				},
+				Err(_) => log::error!("Could not lock MSG_ROOT_MAP for writing")
+			}
+
+			let channels_merkle_call = polkadot::apis().channel_merkle_api().get_xcmp_channels_proof(RECEIVER_CHANNEL_ID);
+			let channel_merkle_proof = match client.subxt_client
+				.runtime_api()
+				.at_latest()
+				.await?
+				.call(channels_merkle_call)
+				.await {
+					Ok(proof) => {
+						log::info!("Got channels merkle proof from 'get_xcmp_channels_proof' {:?}", proof);
+						proof
+					},
+					Err(e) => {
+						log::info!("Got error from trying to call `get_xcmp_channels_proof` {:?}", e);
+						None
+					}
+				}.ok_or_else(|| {
+					log::error!("error in generating stage 3 of proof exited generate_xcmp_proof");
+					RelayerError::Default
+				})?;
+
+			let roots_match = match MSG_ROOT_MAP.try_lock() {
+				Ok(mut s) => {
+					if s.contains_key(&channel_merkle_proof.leaf.clone()) {
+						true
+					}
+					else {
+						false
+					}
+				}
+				Err(_) => {
+					log::error!("Could not lock MSG_ROOT_MAP for writing");
+					false
+				}
+			};
+
+			if !roots_match {
+				log::error!("Roots dont match between msg_mmr_root and channel_merkle_root!!@£!@£");
+				continue;
+			}
+
+			match MSG_ROOT_CHANNEL_MERKLE_MAP.try_lock() {
+				Ok(mut s) => {
+					s.insert(msg_root.clone(), channel_merkle_proof.into());
+					log::debug!(
+						"Inserting into storage msg_root for channel_merkle_proof {:?}",
+						msg_root
+					);
+				},
+				Err(_) => log::error!("Could not lock MSG_ROOT_CHANNEL_MERKLE_MAP for writing")
+			}
+
+		}
+		Ok::<(), anyhow::Error>(())
+	});
+	Ok(())
+}
+
+async fn generate_xcmp_proof(client: &MultiClient, _relay_client: &MultiClient, recv_client: &MultiClient) -> anyhow::Result<()> {
 	log::info!("Entered generate xcmp proof");
 	let client = client.clone();
+	let recv_client = recv_client.clone();
+
+	let block = client.subxt_client.blocks().at_latest().await?;
+
+	let (stage_4_root, stage_4_proof) = match MSG_ROOT_MAP.try_lock() {
+		Ok(s) => {
+			s.iter().next().map(|(key, value)| (key.clone(), value.clone()))
+		},
+		Err(_) => {
+			log::error!("Could not lock MSG_ROOT_MAP for reading");
+			None
+		}
+	}.ok_or_else(|| {
+			log::error!("Could not read stage_4_root and stage_4_proof from MSG_ROOT_MAP");
+			RelayerError::Default
+		}
+	)?;
+
+	let roots_match = match MSG_ROOT_CHANNEL_MERKLE_MAP.try_lock() {
+		Ok(s) => {
+			if s.contains_key(&stage_4_root) {
+				true
+			}
+			else {
+				false
+			}
+		}
+		Err(_) => {
+			log::error!("Could not lock MSG_ROOT_CHANNEL_MERKLE_MAP for writing");
+			false
+		}
+	};
+
+	if !roots_match {
+		log::error!("Stage 4 root doesnt exist yet for stage 3 generation proof generation failed..");
+		return Err(RelayerError::Default.into())
+	}
+
+	let stage_4_leaves = Decode::decode(&mut &stage_4_proof.leaves.0[..])
+			.map_err(|e| anyhow::Error::new(e))?;
+	let stage_4_decoded_proof: XcmpProofType<H256> = Decode::decode(&mut &stage_4_proof.proof.0[..])
+			.map_err(|e| anyhow::Error::new(e))?;
+
+	match MSG_ROOT_MAP.try_lock() {
+		Ok(mut s) => {
+			s.remove(&stage_4_root)
+		},
+		Err(_) => {
+			log::error!("Could not lock MSG_ROOT_MAP for reading");
+			None
+		}
+	}.ok_or_else(|| {
+			log::error!("Could not read stage_4_root and stage_4_proof from MSG_ROOT_MAP");
+			RelayerError::Default
+		}
+	)?;
+
+	let stage_3_proof = match MSG_ROOT_CHANNEL_MERKLE_MAP.try_lock() {
+		Ok(s) => {
+			s.get(&stage_4_root).cloned()
+		},
+		Err(_) => {
+			log::error!("Could not lock MSG_ROOT_CHANNEL_MERKLE_MAP for reading");
+			None
+		}
+	}.ok_or_else(|| {
+			log::error!("Could not read stage_4_root and stage_4_proof from MSG_ROOT_CHANNEL_MERKLE_MAP");
+			RelayerError::Default
+		}
+	)?;
+
 	// 1.) For each para block on receiver get the current Beefy Root on chain via RPC or subxt
 	let beefy_api_call = polkadot::apis().messaging_api().get_current_beefy_root();
 	let beefy_root = match client.subxt_client
@@ -313,7 +488,9 @@ async fn generate_stage_xcmp_proof(client: &MultiClient, _relay_client: &MultiCl
 				H256::zero()
 			}
 		};
-	log::info!("Beefy Root obtained in generate_stage_xcmp_proof: {:?}", beefy_root);
+	log::info!("Beefy Root obtained in generate_xcmp_proof: {:?}", beefy_root);
+
+
 
 	// 2.) Then call RPC to generate mmr_proof for Relay block number corresponding to this Beefy Root
 	let (relay_block_num, proof) = match BEEFY_MMR_MAP.try_lock() {
@@ -359,9 +536,9 @@ async fn generate_stage_xcmp_proof(client: &MultiClient, _relay_client: &MultiCl
 		stage_1: (decoded_proof, leaves),
 		stage_2: merkle_proof.into(),
 		// TODO: Implement
-		stage_3: (),
+		stage_3: stage_3_proof.into(),
 		// TODO: Implement
-		stage_4: (dummy_proof, Vec::new()),
+		stage_4: (stage_4_decoded_proof, stage_4_leaves),
 	};
 
 	log::info!("Got Relayblock Num {} for Beefy Root {:?}", relay_block_num, beefy_root);
@@ -453,11 +630,12 @@ async fn submit_proof(client: &MultiClient, proof: LeavesProof<H256>) -> anyhow:
 	Ok(())
 }
 
-async fn get_proof_and_verify(client: &MultiClient, relay_client: &MultiClient) -> anyhow::Result<()> {
+async fn get_proof_and_verify(client: &MultiClient, relay_client: &MultiClient, recv_client: &MultiClient) -> anyhow::Result<()> {
 	let client = client.clone();
 	let relay_client = relay_client.clone();
-	let mut root = generate_mmr_root(&client, Some(0)).await?;
-	let mut proof = generate_mmr_proof(&client, 1u64, Some(0)).await?;
+	let recv_client = recv_client.clone();
+	let mut root = generate_mmr_root(&client, Some(RECEIVER_CHANNEL_ID)).await?;
+	let mut proof = generate_mmr_proof(&client, 1u64, Some(RECEIVER_CHANNEL_ID)).await?;
 
 	let params = rpc_params![root, proof.clone()];
 
@@ -490,14 +668,14 @@ async fn get_proof_and_verify(client: &MultiClient, relay_client: &MultiClient) 
 			};
 			log::info!("{}", update_root_string);
 
-			let _ = generate_stage_xcmp_proof(&client, &relay_client).await;
+			let _ = generate_xcmp_proof(&client, &relay_client, &recv_client).await;
 
 			if onchain_root == root {
 				log::info!("onchain_root matches!!! submitting now!!");
 				let submit_proof_string = match submit_proof(&client, proof.clone()).await {
 					Ok(_) => {
-						root = generate_mmr_root(&client, Some(0)).await?;
-						proof = generate_mmr_proof(&client, 1u64, Some(0)).await?;
+						root = generate_mmr_root(&client, Some(RECEIVER_CHANNEL_ID)).await?;
+						proof = generate_mmr_proof(&client, 1u64, Some(RECEIVER_CHANNEL_ID)).await?;
 						"Submit proof successfully submitted".to_string()
 					},
 					Err(e) => format!("Cant submit proof on chain yet {:?}", e),

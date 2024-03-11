@@ -31,11 +31,31 @@ pub trait XcmpMessageProvider<Hash> {
 	fn get_xcmp_messages(block_hash: Hash, para_id: ParaId) -> Self::XcmpMessages;
 }
 
+#[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
+pub struct ChannelMerkleProof {
+	pub root: H256,
+	pub proof: Vec<H256>,
+	pub num_leaves: u64,
+	pub leaf_index: u64,
+	pub leaf: H256,
+}
+
+impl Default for ChannelMerkleProof {
+	fn default() -> Self {
+		ChannelMerkleProof {
+			root: H256::zero(),
+			proof: Vec::new(),
+			num_leaves: 0u64,
+			leaf_index: 0u64,
+			leaf: H256::zero(),
+		}
+	}
+}
+
 type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
 type MmrProof = Proof<H256>;
 type ChannelId = u64;
 type BinaryMerkleProof = ();
-
 
 #[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
 pub struct XcmpProof {
@@ -43,7 +63,7 @@ pub struct XcmpProof {
 	// TODO: Remove tuples
 	pub stage_1: (MmrProof, Vec<EncodableOpaqueLeaf>),
 	pub stage_2: ParaMerkleProof,
-	pub stage_3: BinaryMerkleProof,
+	pub stage_3: ChannelMerkleProof,
 	pub stage_4: (MmrProof, Vec<EncodableOpaqueLeaf>),
 }
 
@@ -121,7 +141,6 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config<I>, I: 'static> Pallet<T, I> {
 
-		// TODO: This will
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn submit_test_proof(origin: OriginFor<T>, mmr_proof: MmrProof, leaves: Vec<EncodableOpaqueLeaf>, channel_id: u64) -> DispatchResult {
@@ -216,6 +235,7 @@ pub mod pallet {
 			// Verify stage 2..
 			// grab ParaHeader root from stage_1_proof
 			// let para_header_root = Decode::decode(stage_1_leaves)
+			// Take Last leaf element as the para_header_root selected
 			// let (stage_2_proof, stage_2_leaves) = xcmp_proof.stage_2;
 
 			// These are different leaves they arent the MmrLeaves they are Binary Merkle Leaves
@@ -305,5 +325,14 @@ impl<T: Config<I>, I: 'static> LeafDataProvider for Pallet<T, I> {
 			version: T::LeafVersion::get(),
 			parent_number_and_hash: ParentNumberAndHash::<T>::leaf_data(),
 		}
+	}
+}
+
+sp_api::decl_runtime_apis! {
+	/// API useful for BEEFY light clients.
+	pub trait ChannelMerkleApi
+	{
+		/// Return BinaryMerkle Proof for a particular parachains inclusion in ParaHeader tree
+		fn get_xcmp_channels_proof(channel_id: u64) -> Option<ChannelMerkleProof>;
 	}
 }
