@@ -3,8 +3,9 @@ use jsonrpsee::{
     http_client::{HttpClient, HttpClientBuilder},
     rpc_params,
 };
-use parity_scale_codec::Decode;
+use parity_scale_codec::{Encode, Decode};
 use runtime::{pallet_xcmp_message_stuffer::ChannelMerkleProof, BlockNumber, Hash, Header};
+// use polkadot_runtime_parachains::paras::{ParaMerkleProof, ParaLeaf};
 use std::{
 	collections::BTreeMap, ops::Sub, sync::Mutex, time::Duration
 };
@@ -153,6 +154,18 @@ impl Clone for RelayParaMerkleProof {
 	}
 }
 
+impl Clone for SubxtChannelMerkleProof {
+	fn clone(&self) -> Self {
+		Self {
+			root: self.root.clone(),
+			proof: self.proof.clone(),
+			num_leaves: self.num_leaves.clone(),
+			leaf_index: self.leaf_index.clone(),
+			leaf: self.leaf.clone(),
+		}
+	}
+}
+
 impl Clone for ParaId {
 	fn clone(&self) -> Self {
 		Self(self.0)
@@ -176,6 +189,7 @@ lazy_static! {
 	static ref PARA_HEADERS_MAP: Mutex<BTreeMap<BeefyMmrRoot, RelayParaMerkleProof>> = Mutex::new(BTreeMap::new());
 	static ref MSG_ROOT_MAP: Mutex<BTreeMap<H256, LeavesProof<H256>>> = Mutex::new(BTreeMap::new());
 	static ref MSG_ROOT_CHANNEL_MERKLE_MAP: Mutex<BTreeMap<H256, ChannelMerkleProof>> = Mutex::new(BTreeMap::new());
+	static ref CHANNEL_ROOT_PROOF_MAP: Mutex<BTreeMap<H256, ChannelMerkleProof>> = Mutex::new(BTreeMap::new());
 }
 
 #[tokio::main]
@@ -319,6 +333,30 @@ async fn collect_relay_data(client: &MultiClient) -> anyhow::Result<()> {
 	Ok(())
 }
 
+async fn extract_xcmp_channel_root(leaf: ParaLeaf) -> anyhow::Result<H256> {
+	// First decode ParaLeaf.head_data into a ParaHeader
+	let header = Header::decode(&mut &leaf.head_data[..])?;
+
+	// Extract the XcmpChannelBinaryMerkleRoot from the Digest
+	// Return the root
+	Ok(H256::zero())
+}
+
+#[tokio::test]
+async fn test_decode() {
+	let header = Header {
+		parent_hash: H256::zero(),
+		state_root: H256::zero(),
+		extrinsics_root: H256::zero(),
+		number: 0u32,
+		digest: Default::default(),
+	};
+	let dummy_input = ParaLeaf { para_id: ParaId(1000).into(), head_data: header.encode() };
+	let result = extract_xcmp_channel_root(dummy_input).await;
+	assert!(result.is_ok());
+	assert_eq!(result.unwrap(), H256::zero());
+}
+
 async fn collect_para_data(client: &MultiClient) -> anyhow::Result<()> {
 	let client = client.clone();
 	task::spawn(async move {
@@ -359,6 +397,16 @@ async fn collect_para_data(client: &MultiClient) -> anyhow::Result<()> {
 					log::error!("error in generating stage 3 of proof exited generate_xcmp_proof");
 					RelayerError::Default
 				})?;
+
+			// For grabbing the channel merkle proofs by their respective root later
+			match CHANNEL_ROOT_PROOF_MAP.try_lock() {
+				Ok(mut s) => {
+					s.insert(channel_merkle_proof.root, channel_merkle_proof.clone().into());
+				},
+				Err(_) => {
+					log::error!("Could not lock Channel ROOT Proof MAP for writing")
+				}
+			}
 
 			let roots_match = match MSG_ROOT_MAP.try_lock() {
 				Ok(mut s) => {
