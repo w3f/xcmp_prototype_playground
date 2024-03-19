@@ -8,7 +8,6 @@ use cumulus_primitives_core::xcmr_digest::extract_xcmp_channel_merkle_root;
 use runtime::{pallet_xcmp_message_stuffer::ChannelMerkleProof, BlockNumber, Hash, Header};
 use sp_mmr_primitives::EncodableOpaqueLeaf;
 use sp_consensus_beefy::mmr::{MmrLeafVersion, MmrLeaf};
-// use polkadot_runtime_parachains::paras::{ParaMerkleProof, ParaLeaf};
 use std::{
 	collections::BTreeMap, ops::Sub, sync::Mutex, time::Duration
 };
@@ -188,7 +187,6 @@ type BeefyMmrRoot = H256;
 type RelayBlockIndex = u32;
 
 lazy_static! {
-	static ref BEEFY_MMR_MAP: Mutex<BTreeMap<BeefyMmrRoot, (RelayBlockIndex, LeavesProof<H256>)>> = Mutex::new(BTreeMap::new());
 	// Mapping (ParaHeaderRoot, RelayBlockNum) -> (BeefyMmrRoot, Proof)
 	static ref LEAVES_BEEFY_MMR_MAP: Mutex<BTreeMap<(H256, RelayBlockIndex), (BeefyMmrRoot, LeavesProof<H256>)>> = Mutex::new(BTreeMap::new());
 	static ref PARA_HEADERS_MAP: Mutex<BTreeMap<BeefyMmrRoot, RelayParaMerkleProof>> = Mutex::new(BTreeMap::new());
@@ -207,23 +205,12 @@ async fn main() -> anyhow::Result<()> {
 	let para_receiver_api = MultiClient::new(DEFAULT_ENDPOINT_PARA_RECEIVER, DEFAULT_RPC_ENDPOINT_PARA_RECEIVER).await?;
 	let relay_api = MultiClient::new(DEFAULT_ENDPOINT_RELAY, DEFAULT_RPC_ENDPOINT_RELAY).await?;
 
-	// 1.) Collect all Beefy Mmr Roots from Relaychain into a HashMap (BeefyMmrRoot -> Relaychain Block number)
-	// Collect all ParaHeaders from sender in order to generate opening in
-	// 2.) ParaHeader Merkle tree (ParaId, ParaHeader(As HeadData))
 	let _ = collect_relay_data(&relay_api).await?;
 	let _ = collect_para_data(&para_sender_api).await?;
 
-	// TODO: Create mapping between Parablock Num -> Vec of all channel Mmr Roots for sender
-	// Keep track of Mmr Index which correspondings to the receiver..
-	// let _ = collect_all_mmr_roots_for_sender(&sender_api).await?;
-
-	// TODO: Add this as a RuntimeApi for generating this from the Relaychain directly
-	// since data is stored there and proof can easily be generated from Validator
-	// Then just Relay this over to receiver correctly in stage 2 of proof
-	// How to convert ParaHeader -> HeadData? Just encode the header as bytes??
-
 	let _ = log_all_mmr_roots(&para_sender_api).await?;
 	let _ = log_all_mmr_proofs(&para_sender_api).await?;
+
 	let _ = get_proof_and_verify(&para_sender_api, &relay_api, &para_receiver_api).await?;
 
 	let _subscribe = log_all_blocks(&vec![para_sender_api, para_receiver_api, relay_api]).await?;
@@ -283,27 +270,13 @@ async fn collect_relay_data(client: &MultiClient) -> anyhow::Result<()> {
 				}
 			)?;
 
-			match BEEFY_MMR_MAP.try_lock() {
-				Ok(mut s) => {
-					s.insert(root.clone(), (block.number(), proof.clone()));
-					log::debug!(
-						"Inserting into storage Beefy root {:?}, for relay block number {}",
-						root,
-						block.number()
-					)
-				},
-				Err(_) => log::error!("Could not lock BEEFY_MMR_MAP for writing")
-			}
-
-			// TODO:
 			// Decode Beefy proof leaves into MmrLeaf type get ParaHeaderRoot from extra_data field
 			// First go from EncodableOpaqueLeaf -> OpaqueLeaf -> MmrLeaf
 			let beefy_leaves: Vec<EncodableOpaqueLeaf> = Decode::decode(&mut &proof.leaves.0[..])
 			.map_err(|e| anyhow::Error::new(e))?;
 
-			// TODO: Search through each leaf for the para_header_root from extra_data field
+			// Search through each leaf for the para_header_root from extra_data field
 			// the element should be one leaf since we only request leaves proof for one blocknum
-
 			if beefy_leaves.len() > 1 {
 				log::error!("Beefy leaves are greater than 1!!!!! issue storing");
 			}
@@ -317,6 +290,7 @@ async fn collect_relay_data(client: &MultiClient) -> anyhow::Result<()> {
 					anyhow::Error::new(e)
 			})?;
 
+			// Store as (ParaHeaderRoot, RelayBlockNum) -> (BeefyMmrRoot, Proof)
 			match LEAVES_BEEFY_MMR_MAP.try_lock() {
 				Ok(mut s) => {
 					log::debug!(
@@ -327,9 +301,6 @@ async fn collect_relay_data(client: &MultiClient) -> anyhow::Result<()> {
 				},
 				Err(_) => log::error!("Could not lock LEAVES_BEEFY_MMR_MAP for writing")
 			}
-
-
-			// Store in (ParaHeaderRoot, RelayBlockNum) -> (BeefyMmrRoot, Proof)
 
 			let id = ParaId(1000u32);
 
@@ -369,6 +340,7 @@ async fn collect_relay_data(client: &MultiClient) -> anyhow::Result<()> {
 				return Err(RelayerError::Default.into())
 			}
 
+			// Now have the `para_header_root` which will be a leaf in the Beefy Mmr
 			match PARA_HEADERS_MAP.try_lock() {
 				Ok(mut s) => {
 					log::debug!(
@@ -380,9 +352,6 @@ async fn collect_relay_data(client: &MultiClient) -> anyhow::Result<()> {
 				},
 				Err(_) => log::error!("Could not lock PARA_HEADERS_MAP for writing")
 			}
-
-			// Now have the `para_header_root` which will be a leaf in the Beefy Mmr
-			// Need the Beefy Root + Proof which includes the opening for this leaf
 
 			log::debug!("Beefy Mmr Root from Relaychain Obtained:: {:?}", root);
 			log::debug!("Para Merkle Proof from Relaychain Obtained:: {:?}", para_merkle_proof);
@@ -404,7 +373,6 @@ async fn extract_xcmp_channel_root(leaf: ParaLeaf) -> anyhow::Result<H256> {
 	let xcmp_channel_root: H256 = extract_xcmp_channel_merkle_root(&header.digest).ok_or(RelayerError::Default)?;
 
 	// Extract the XcmpChannelBinaryMerkleRoot from the Digest
-	// Return the root
 	Ok(xcmp_channel_root)
 }
 
@@ -510,6 +478,8 @@ async fn collect_para_data(client: &MultiClient) -> anyhow::Result<()> {
 	Ok(())
 }
 
+// TODO: Add documentation for this function and add helper functions for each step to make it smaller and
+// easier to digest
 async fn generate_xcmp_proof(client: &MultiClient, _relay_client: &MultiClient, recv_client: &MultiClient) -> anyhow::Result<()> {
 	log::info!("Entered generate xcmp proof");
 	let client = client.clone();
@@ -581,7 +551,6 @@ async fn generate_xcmp_proof(client: &MultiClient, _relay_client: &MultiClient, 
 
 	let stage_2_proof = match PARA_HEADERS_MAP.try_lock() {
 		Ok(s) => {
-			// Should instead be the stage_3_root
 			s.get(&stage_3_proof.root.clone()).cloned()
 		},
 		Err(_) => {
@@ -593,12 +562,9 @@ async fn generate_xcmp_proof(client: &MultiClient, _relay_client: &MultiClient, 
 		RelayerError::Default
 	})?;
 
-	// TODO:
 	// Lookup in `LEAVES_BEEFY_MMR_MAP` all values for keys (state_2_proof.root, _) collect into a vec
 	// Log size of this
-	// If size is 1 then place the proof and root into the stage_1 proof if not log error and go from there.
-	// Compare `para_header_root` to extra_data field. They should match..
-
+	// If size is 1 then place the proof and root into the stage_1 proof if not log error and take last entry
 	let beefy_entries = match LEAVES_BEEFY_MMR_MAP.try_lock() {
 		Ok(mut s) => {
 			s.iter()
@@ -643,7 +609,7 @@ async fn generate_xcmp_proof(client: &MultiClient, _relay_client: &MultiClient, 
 		}
 	)?;
 
-	// 1.) For each para block on receiver get the current Beefy Root on chain via RPC or subxt
+	// Checking which is the current beefy root on chain for logging
 	let beefy_api_call = polkadot::apis().messaging_api().get_current_beefy_root();
 	let beefy_root = match client.subxt_client
 		.runtime_api()
