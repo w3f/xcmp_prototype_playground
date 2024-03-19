@@ -11,6 +11,7 @@ runtime = { path = "../runtime", package = "parachain-template-runtime" }
 
 polkadot-runtime-parachains = { workspace = true }
 polkadot-parachain = { workspace = true }
+cumulus-primitives-core = { workspace = true }
 serde_json = { workspace = true }
 parity-scale-codec = { workspace = true }
 jsonrpsee = { workspace = true }
@@ -27,6 +28,7 @@ lazy_static = { workspace = true }
 sp-runtime = { workspace = true }
 sp-core = { workspace = true }
 sp-mmr-primitives = { workspace = true }
+sp-consensus-beefy = { workspace = true }
 
 subxt = { workspace = true }
 subxt-signer = { workspace = true }

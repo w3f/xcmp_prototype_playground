@@ -14613,6 +14613,7 @@ name = "xcmp_relayer"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "cumulus-primitives-core",
  "directories 5.0.1",
  "env_logger 0.10.2",
  "futures",
@@ -14627,6 +14628,7 @@ dependencies = [
  "polkadot-parachain-primitives",
  "polkadot-runtime-parachains",
  "serde_json",
+ "sp-consensus-beefy",
  "sp-core",
  "sp-mmr-primitives",
  "sp-runtime",
