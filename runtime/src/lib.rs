@@ -27,7 +27,9 @@ use sp_runtime::{
 
 use sp_consensus_beefy::mmr::MmrLeafVersion;
 
-use parity_scale_codec::Encode;
+use parity_scale_codec::{Encode, Decode};
+
+use polkadot_runtime_parachains::paras::{ParaMerkleProof, ParaLeaf};
 
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -505,6 +507,28 @@ impl CollectXcmpChannelMmrRoots for XcmpChannelRootCollector {
 	}
 }
 
+use pallet_xcmp_message_stuffer::ChannelMerkleProof;
+pub struct ChannelMerkleProofGen;
+impl ChannelMerkleProofGen {
+	// TODO: Allow the channel_id to select the appropriate MMR and index of leaf
+	pub fn gen_merkle_proof(_channel_id: u64) -> Option<ChannelMerkleProof> {
+		let index_to_prove = 0;
+
+		let merkle_proof = binary_merkle_tree::merkle_proof::<mmr::Hashing, _, sp_core::H256>(
+			vec![MmrParaA::mmr_root_hash(), MmrParaB::mmr_root_hash()],
+			index_to_prove
+		);
+		let result_proof = ChannelMerkleProof {
+			root: merkle_proof.root,
+			proof: merkle_proof.proof,
+			num_leaves: merkle_proof.number_of_leaves as u64,
+			leaf_index: merkle_proof.leaf_index as u64,
+			leaf: merkle_proof.leaf,
+		};
+		Some(result_proof)
+	}
+}
+
 
 parameter_types! {
 	/// Version of the produced MMR leaf.
@@ -732,6 +756,12 @@ impl_runtime_apis! {
 			// TODO: For now if there is no root just return H256::zero() Remove! for better error handling
 			<ParachainSystem as GetBeefyRoot>::get_root().unwrap_or(
 				sp_core::H256::from(&[1; 32]))
+		}
+	}
+
+	impl pallet_xcmp_message_stuffer::ChannelMerkleApi<Block> for Runtime {
+		fn get_xcmp_channels_proof(channel_id: u64) -> Option<ChannelMerkleProof> {
+			ChannelMerkleProofGen::gen_merkle_proof(channel_id)
 		}
 	}
 
