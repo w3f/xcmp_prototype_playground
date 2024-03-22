@@ -56,10 +56,6 @@ impl Default for ChannelMerkleProof {
 type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
 type MmrProof = Proof<H256>;
 type ChannelId = u64;
-<<<<<<< HEAD
-=======
-type BinaryMerkleProof = ();
->>>>>>> main
 
 #[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
 pub struct XcmpProof {
@@ -246,18 +242,10 @@ pub mod pallet {
 				"Verified Stage 1 XCMP Proof Successfully!!!",
 			);
 
-<<<<<<< HEAD
 			if stage_1_leaves.len() > 1 {
 				log::error!("stage_1_leaves length too long {}", stage_1_leaves.len());
 				return Err(Error::<T, I>::XcmpStage1LeavesTooLarge.into())
 			}
-=======
-			// Verify stage 2..
-			// grab ParaHeader root from stage_1_proof
-			// let para_header_root = Decode::decode(stage_1_leaves)
-			// Take Last leaf element as the para_header_root selected
-			// let (stage_2_proof, stage_2_leaves) = xcmp_proof.stage_2;
->>>>>>> main
 
 			let stage_1_leaf = &stage_1_leaves[0];
 			let stage_1_leaf = stage_1_leaf.clone().into_opaque_leaf();
