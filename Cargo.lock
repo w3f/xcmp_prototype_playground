@@ -7003,6 +7003,7 @@ dependencies = [
 name = "pallet-xcmp-message-stuffer"
 version = "0.1.0"
 dependencies = [
+ "binary-merkle-tree",
  "cumulus-pallet-parachain-system",
  "cumulus-pallet-xcmp-queue",
  "cumulus-primitives-core",
