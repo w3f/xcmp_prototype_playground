@@ -2,16 +2,17 @@
 
 pub use pallet::*;
 use pallet_mmr::{LeafDataProvider, ParentNumberAndHash, verify_leaves_proof};
-use sp_consensus_beefy::mmr::MmrLeafVersion;
 
 use frame_support::{dispatch::{DispatchResult}, pallet_prelude::*, WeakBoundedVec};
 use frame_system::pallet_prelude::*;
-use cumulus_primitives_core::{ParaId, GetBeefyRoot};
+use cumulus_primitives_core::{ParaId, GetBeefyRoot, xcmr_digest::extract_xcmp_channel_merkle_root};
 use sp_runtime::traits::{Hash as HashT, Keccak256};
 use sp_core::H256;
-use polkadot_runtime_parachains::paras::ParaMerkleProof;
+use polkadot_runtime_parachains::paras::{ParaMerkleProof, ParaLeaf};
+use binary_merkle_tree::Leaf;
 
 use sp_mmr_primitives::{Proof, EncodableOpaqueLeaf, DataOrHash};
+use sp_consensus_beefy::mmr::{MmrLeafVersion, MmrLeaf as BeefyMmrLeaf};
 use scale_info::prelude::vec::Vec;
 
 #[cfg(test)]
@@ -55,7 +56,10 @@ impl Default for ChannelMerkleProof {
 type XcmpMessages<T, I> = <<T as crate::Config<I>>::XcmpDataProvider as XcmpMessageProvider<<T as frame_system::Config>::Hash>>::XcmpMessages;
 type MmrProof = Proof<H256>;
 type ChannelId = u64;
+<<<<<<< HEAD
+=======
 type BinaryMerkleProof = ();
+>>>>>>> main
 
 #[derive(Debug, PartialEq, Eq, Clone, Encode, Decode, TypeInfo)]
 pub struct XcmpProof {
@@ -119,6 +123,16 @@ pub mod pallet {
 		XcmpProofLeavesNotValid,
 		XcmpNoChannelRootForChannelId,
 		XcmpBeefyRootTargetedNeverSeen,
+		XcmpStage1LeavesTooLarge,
+		XcmpStage1ProofDoesntVerify,
+		XcmpStage2RootDoesntMatch,
+		XcmpStage2LeafDoesntDecode,
+		XcmpStage2ProofDoesntVerify,
+		XcmpStage3HeaderDoesntDecode,
+		XcmpStage3CannotBeExtracted,
+		XcmpStage3RootDoesntMatch,
+		XcmpStage3ProofDoesntVerify,
+		XcmpStage4ProofDoesntVerify,
 	}
 
 	#[pallet::hooks]
@@ -184,7 +198,7 @@ pub mod pallet {
 		}
 
 		/// TODO: This is just for testing relayer for now. The root should be updated by checking
-		/// the relaychain updated XCMPTrie
+		/// the relaychain updated XCMPTrie remove
 		#[pallet::call_index(1)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn update_root(origin: OriginFor<T>, root: H256, channel_id: u64) -> DispatchResult {
@@ -225,65 +239,104 @@ pub mod pallet {
 				.collect();
 
 			// TODO: Replace this error with an Error that specifies stage_1 of proof verification failed
-			verify_leaves_proof(beefy_root_targeted.into(), nodes, stage_1_proof).map_err(|_| Error::<T, I>::XcmpProofNotValid)?;
+			verify_leaves_proof(beefy_root_targeted.into(), nodes, stage_1_proof).map_err(|_| Error::<T, I>::XcmpStage1ProofDoesntVerify)?;
 
 			log::info!(
 				target: LOG_TARGET,
-				"Verified Stage 1 Big XCMP Proof Successfully!!!",
+				"Verified Stage 1 XCMP Proof Successfully!!!",
 			);
 
+<<<<<<< HEAD
+			if stage_1_leaves.len() > 1 {
+				log::error!("stage_1_leaves length too long {}", stage_1_leaves.len());
+				return Err(Error::<T, I>::XcmpStage1LeavesTooLarge.into())
+			}
+=======
 			// Verify stage 2..
 			// grab ParaHeader root from stage_1_proof
 			// let para_header_root = Decode::decode(stage_1_leaves)
 			// Take Last leaf element as the para_header_root selected
 			// let (stage_2_proof, stage_2_leaves) = xcmp_proof.stage_2;
+>>>>>>> main
 
-			// These are different leaves they arent the MmrLeaves they are Binary Merkle Leaves
-			// This will be a bit different but same rough idea as the Mmr
-			// let nodes: Vec<_> = stage_2_leaves
-			// 	.clone()
-			// 	.into_iter()
-			// 	.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
-			// 	.collect();
+			let stage_1_leaf = &stage_1_leaves[0];
+			let stage_1_leaf = stage_1_leaf.clone().into_opaque_leaf();
 
-			// binary merkle proof verification of para_header_root against stage_2_proof(leaves are (para_id, para_header))
-			// verify_proof(root, nodes, stage_2_proof);
+			let stage_2_leaf: BeefyMmrLeaf<BlockNumberFor<T>, H256, H256, H256> = Decode::decode(&mut &stage_1_leaf.0[..])
+				.map_err(|e| {
+					log::error!("COULD NOT DECODE LEAF!! WITH ERROR {:?}", e);
+					Error::<T, I>::XcmpStage2LeafDoesntDecode
+			})?;
 
-			// let (para_id, para_header) = Decode::decode(stage_2_leaves);
-			// Check channels storage to make sure this ParaId is someone that we support
-			// if !XcmpChannels::<T>::exists(para_id) {
-					// return Error::<T>::XcmpProofNoChannelWithSender
-			// }
+			let stage_2_root_from_proof = xcmp_proof.stage_2.root;
+			let stage_2_root = stage_2_leaf.leaf_extra;
 
-			// Verify stage 3..
-			// extract xcmp_root from paraheader..
-			// let xcmp_root = extract(para_header)
-			// let (stage_3_proof, stage_3_leaves) = xcmp_proof.stage_3;
+			if stage_2_root != stage_2_root_from_proof {
+				log::error!("Stage_2 Root no match failed to verify Proof!");
+				return Err(Error::<T, I>::XcmpStage2RootDoesntMatch.into())
+			}
 
-			// These are different leaves they arent the MmrLeaves they are Binary Merkle Leaves
-			// This will be a bit different but same rough idea as the Mmr
-			// let nodes: Vec<_> = stage_3_leaves
-			// 	.clone()
-			// 	.into_iter()
-			// 	.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
-			// 	.collect();
+			let stage_2_result = binary_merkle_tree::verify_proof::<Keccak256, _, _>(
+				&xcmp_proof.stage_2.root,
+				xcmp_proof.stage_2.proof,
+				xcmp_proof.stage_2.num_leaves.try_into().unwrap(),
+				xcmp_proof.stage_2.leaf_index.try_into().unwrap(),
+				Leaf::Value(&xcmp_proof.stage_2.leaf.encode()),
+			);
 
-			// binary merkle proof verification of xcmp_root against stage_3_proof(mmr_root_from_sender)
-			// verify_proof(xcmp_root, nodes, stage_3_proof)?;
+			if !stage_2_result {
+				log::error!("Stage 2 proof doesnt verify!!!!!!");
+				return Err(Error::<T, I>::XcmpStage2ProofDoesntVerify.into())
+			}
 
-			// Verify stage 4..
-			// let mmr_root = Decode::decode(stage_3_leaves);
-			// let (stage_4_proof, stage_4_leaves) = xcmp_proof.stage_4;
+			log::info!(
+				target: LOG_TARGET,
+				"Verified Stage 2 XCMP Proof Successfully!!!",
+			);
 
-			// let nodes: Vec<_> = stage_4_leaves
-			// 	.clone()
-			// 	.into_iter()
-			// 	.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
-			// 	.collect();
+			let stage_3_root = Self::extract_xcmp_channel_root(xcmp_proof.stage_2.leaf.clone())?;
 
-			// TODO: Replace this error with an Error that specifies stage_4 of proof verification failed
-			// verify_leaves_proof(mmr_root.into(), nodes, stage_4_proof).map_err(|_| Error::<T, I>::XcmpProofNotValid)?;
+			if stage_3_root != xcmp_proof.stage_3.root {
+				log::error!("Stage_3 Root no match failed to verify Proof!");
+				return Err(Error::<T, I>::XcmpStage3RootDoesntMatch.into())
+			}
 
+			let stage_3_result = binary_merkle_tree::verify_proof::<Keccak256, _, _>(
+				&xcmp_proof.stage_3.root,
+				xcmp_proof.stage_3.proof,
+				xcmp_proof.stage_3.num_leaves.try_into().unwrap(),
+				xcmp_proof.stage_3.leaf_index.try_into().unwrap(),
+				&xcmp_proof.stage_3.leaf,
+			);
+
+			if !stage_3_result {
+				log::error!("Stage 3 proof doesnt verify!!!!!!");
+				return Err(Error::<T, I>::XcmpStage3ProofDoesntVerify.into())
+			}
+
+			log::info!(
+				target: LOG_TARGET,
+				"Verified Stage 3 XCMP Proof Successfully!!!",
+			);
+
+			let stage_4_root = xcmp_proof.stage_3.leaf;
+
+			let (stage_4_proof, stage_4_leaves) = xcmp_proof.stage_4;
+
+			let nodes: Vec<_> = stage_4_leaves
+				.clone()
+				.into_iter()
+				.map(|leaf|DataOrHash::<Keccak256, _>::Data(leaf.into_opaque_leaf()))
+				.collect();
+
+			verify_leaves_proof(stage_4_root.into(), nodes, stage_4_proof).map_err(|_| Error::<T, I>::XcmpStage4ProofDoesntVerify)?;
+
+			log::info!(
+				target: LOG_TARGET,
+				"Verified Stage 4 XCMP Proof Successfully!!!",
+			);
+
+			// TODO:
 			// Now process messages upstream
 			// let xcmp_messages = Decode::decode(stage_4_leaves);
 			// Send Xcmp Messages upstream to be decoded to XCM messages and processed
@@ -297,7 +350,24 @@ pub mod pallet {
 
 }
 
-// TODO: Add Inherent which can update the current `XcmpChannelRoots` against the current BeefyMmrRoot
+
+impl<T: Config<I>, I: 'static> Pallet<T, I> {
+
+	fn extract_xcmp_channel_root(leaf: ParaLeaf) -> Result<H256, Error<T,I>> {
+		// First decode ParaLeaf.head_data into a ParaHeader
+		let header: sp_runtime::generic::Header<u32, sp_runtime::traits::BlakeTwo256> =
+			sp_runtime::generic::Header::decode(&mut &leaf.head_data[..])
+			.map_err(|_e| Error::<T, I>::XcmpStage3HeaderDoesntDecode)?;
+
+		log::debug!("EXTRACTED AND DECODED HEADERRR DANKEEEE!!!!!!{:?}", header);
+
+		// extracting root from digest
+		let xcmp_channel_root: H256 = extract_xcmp_channel_merkle_root(&header.digest).ok_or(Error::<T, I>::XcmpStage3CannotBeExtracted)?;
+
+		// Extract the XcmpChannelBinaryMerkleRoot from the Digest
+		Ok(xcmp_channel_root)
+	}
+}
 
 pub struct OnNewRootSatisfier<T>(PhantomData<T>);
 
